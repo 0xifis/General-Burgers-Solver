@@ -2,20 +2,22 @@
 #define CLASS_MODEL
 
 #include <iostream>
+#include <vector>
+#include <string>
 using namespace std;
 
 //#include "mpi.h"
 
 class Model {
 	public:
-		Model(int argc, char* argv[]) {
-		    ParseParameters(argc, argv);
-		};
+		Model(int argc, char* argv[]);
 //        ~Model();
 
-        void PrintParameters();
+        void PrintParameters() {};
 
         bool IsValid();
+
+        void PrintHelp();
 
         // Getters
 		bool   IsVerbose() const { return verbose; }
@@ -39,23 +41,14 @@ class Model {
         // Add any other getters here...
 
 	private:
-        void ParseParameters(int argc, char* argv[]) {
-            if (argc < 5) {
-                cout << "Incorrect number of arguments" << argc << endl;
-            }
-//            std::stringstream(argv[1]) >> ax;
+        void ParseParameters(vector <string> argv);
 
-//            ay = argv[2];
-//            b = argv[13;
-//            c = argv[4;
-
-            Lx = 10;
-            Ly = 10;
-		};
         void ValidateParameters();
 
 	    bool verbose;
         bool help;
+        bool valid;
+        string fname;
 
 	    // Numerics
 	    double x0;
@@ -78,5 +71,52 @@ class Model {
 
         // Add any additional parameters here...
 };
+
+Model::Model(int argc, char* argv[]) {
+    vector <string> parameters_physics;
+    for(int i=1; i < argc; ++i ) {
+        string arg = argv[i];
+        if (arg == "-h" || arg =="--help") {
+            PrintHelp();
+        } else if (arg == "-v" || arg == "-verbose") {
+            verbose = true;
+        } else {
+            parameters_physics.push_back(arg);
+        }
+    }
+    if (!help) {
+        ParseParameters(parameters_physics);
+        Lx = 10;
+        Ly = 10;
+        T = 0.0;
+
+        if (verbose) {
+            PrintParameters();
+        }
+    }
+};
+
+void Model::ParseParameters(vector <string> argv) {
+    int argc = argv.size();
+    if (argc != 4) {
+        cout << "Incorrect number of arguments (" << argc << " instead of 4)" << endl;
+        PrintHelp();
+        valid = false;
+    } else {
+        ax = stod(argv[0]);
+        ay = stod(argv[1]);
+        b = stod(argv[2]);
+        c = stod(argv[3]);
+    }
+}
+
+void Model::PrintHelp() {
+    help = true;
+    cerr << "Usage: " << fname << "ax ay b c <option(s)>" << endl
+         << "Options:\n"
+         << "\t-h,--help\t\tShow this help message\n"
+         << "\t-v,--verbose\t\tVerbose Output\n"
+         << endl;
+}
 
 #endif

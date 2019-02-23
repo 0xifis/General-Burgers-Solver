@@ -9,6 +9,10 @@
 /Users/batnu/Documents/Year 3/HPC/Coursework/Model.h
 iostream
 -
+vector
+-
+string
+-
 
 /Users/batnu/Documents/Year 3/HPC/Coursework/burgers.cpp
 chrono

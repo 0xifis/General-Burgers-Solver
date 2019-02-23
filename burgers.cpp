@@ -4,10 +4,9 @@
 //#include "Burgers.h"
 
 int main(int argc, char* argv[]) {
-
-
+    // if "-h" is present, run help function
     Model m(argc, argv);
-//    Burgers b(m);
+//        Burgers b(m);
 
     // Call code to initialise the problem here
 
@@ -20,6 +19,5 @@ int main(int argc, char* argv[]) {
     hrc::time_point end = hrc::now();
 
     // Calculate final energy and write output
-
     return 0;
 }
