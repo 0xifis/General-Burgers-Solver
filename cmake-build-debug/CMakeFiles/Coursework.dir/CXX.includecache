@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/batnu/Documents/Year 3/HPC/Coursework/Model.h
+iostream
+-
+
+/Users/batnu/Documents/Year 3/HPC/Coursework/burgers.cpp
+chrono
+-
+Model.h
+/Users/batnu/Documents/Year 3/HPC/Coursework/Model.h
+
