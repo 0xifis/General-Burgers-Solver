@@ -1,3 +1,0 @@
-/Users/batnu/Documents/Year 3/HPC/Coursework/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/Users/batnu/Documents/Year 3/HPC/Coursework/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/batnu/Documents/Year 3/HPC/Coursework/cmake-build-debug/CMakeFiles/Coursework.dir
