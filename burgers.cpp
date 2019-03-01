@@ -1,7 +1,7 @@
 #include <chrono>
 
 #include "Model.h"
-//#include "Burgers.h"
+#include "Burgers.h"
 
 using namespace std;
 
@@ -10,9 +10,10 @@ int main(int argc, char* argv[]) {
     if (m.isVerbose()) m.printParameters();
     if (m.isValid()) {
         cout << "Now running the model with given parameters." << endl;
-//                Burgers b(m);
+        Burgers b(m);
 
         // Call code to initialise the problem here
+        b.initializeVelocityField();
 
         typedef std::chrono::high_resolution_clock hrc;
         typedef std::chrono::milliseconds ms;
