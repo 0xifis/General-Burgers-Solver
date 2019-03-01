@@ -46,12 +46,15 @@ class Model {
         bool            valid = false;
         string          fname;
 
-	    // Numerics
+	    // Geometric
 	    double          x0   =   0;
 	    double          y0   =   0;
 	    double          Lx   =   10;
 	    double          Ly   =   10;
+
 	    double          T    =   1;
+
+	    // Numeric
 	    unsigned int    Nx   =   20;
 	    unsigned int    Ny   =   20;
 	    unsigned int    Nt   =   40;
@@ -68,6 +71,7 @@ class Model {
 
 Model::Model(int argc, char* argv[]) {
     if(!Model::parseArguments(argc, argv)) return;
+    Model::validateParameters();
 };
 
 bool Model::parseArguments(int argc, char* argv[]) {
@@ -130,6 +134,10 @@ bool Model::parseArguments(int argc, char* argv[]) {
         }
     }
     return true;
+}
+
+void Model::validateParameters() {
+    Model::valid = true; // TODO
 }
 
 void Model::printHelp() {
