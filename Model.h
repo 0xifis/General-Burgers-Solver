@@ -11,7 +11,7 @@ class Model {
 	public:
 		Model(int argc, char* argv[]) {
             if(!Model::parseArguments(argc, argv)) return;
-            Model::validateParameters();
+            Model::valid = Model::validateParameters();
 		};
 //        ~Model(); //TODO
 
@@ -40,7 +40,7 @@ class Model {
 	private:
         bool parseArguments(int argc, char* argv[]);
         void printHelp();
-        void validateParameters();
+        bool validateParameters();
 
         // Meta Parameters
 	    bool            verbose;

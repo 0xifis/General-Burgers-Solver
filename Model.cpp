@@ -62,8 +62,25 @@ bool Model::parseArguments(int argc, char* argv[]) {
     return true;
 }
 
-void Model::validateParameters() {
-    Model::valid = true; // TODO
+bool Model::validateParameters() {
+    // Validate geometric parameters
+    double* geometric_parameters[] = {&(Model::Lx), &(Model::Ly), &(Model::T)};
+    for (auto &parameter : geometric_parameters) {
+        if(*parameter < 0) return false;
+    }
+
+    // Validate numeric parameters
+    unsigned int* numeric_parameters[] = {&(Model::Nx), &(Model::Ny), &(Model::Nt)};
+    for (auto &parameter : numeric_parameters) {
+        if(*parameter <= 0) return false;
+    }
+
+    // Set size of steps based on number of steps
+    Model::dx = Model::Lx/(Model::Nx-1);
+    Model::dy = Model::Ly/(Model::Ny-1);
+    Model::dt = Model::T/Model::Nt;
+
+    return true;
 }
 
 void Model::printHelp() {
