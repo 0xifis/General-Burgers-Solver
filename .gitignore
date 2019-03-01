@@ -38,5 +38,11 @@
 
 # End of https://www.gitignore.io/api/c++
 
+<<<<<<< HEAD
 /cmake-build-debug
 .idea/
+=======
+cmake-build-debug/
+.idea/
+.idea/workspace.xm
+>>>>>>> feature/build_model
