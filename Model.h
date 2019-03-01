@@ -11,7 +11,7 @@ using namespace std;
 class Model {
 	public:
 		Model(int argc, char* argv[]);
-//        ~Model();
+//        ~Model(); //TODO
 
         void printParameters();
 
@@ -68,7 +68,6 @@ class Model {
 
 Model::Model(int argc, char* argv[]) {
     if(!Model::parseArguments(argc, argv)) return;
-    if (Model::verbose) Model::printParameters();
 };
 
 bool Model::parseArguments(int argc, char* argv[]) {
@@ -76,7 +75,6 @@ bool Model::parseArguments(int argc, char* argv[]) {
         string arg = string(argv[i]);
         if (arg == "-h" || arg == "--help") {
             printHelp();
-            return false;
         }
         else if (arg == "-v" || arg == "--verbose") {
             Model::verbose = true;
@@ -84,9 +82,9 @@ bool Model::parseArguments(int argc, char* argv[]) {
         else if (arg == "-p" || arg == "--physics") {
             try {
                 double* physical_parameters[] = {&(Model::ax), &(Model::ay), &(Model::b), &(Model::c)};
-                for (int j = 1; j < 5; ++j) {
+                for (auto &physical_parameter : physical_parameters) {
                     i++;
-                    *physical_parameters[j-1] = stod(string(argv[i]));
+                    *physical_parameter = stod(string(argv[i]));
                 }
             }
             catch(const exception& e) {
@@ -119,10 +117,10 @@ bool Model::parseArguments(int argc, char* argv[]) {
         }
         else if (arg == "-n" || arg == "--numeric") {
             try {
-                unsigned int* physical_parameters[] = {&(Model::Nx), &(Model::Ny), &(Model::Nt)};
-                for (int j = 1; j < 4; ++j) {
+                unsigned int* numerical_parameters[] = {&(Model::Nx), &(Model::Ny), &(Model::Nt)};
+                for (auto &numerical_parameter : numerical_parameters) {
                     i++;
-                    *physical_parameters[j-1] = stod(string(argv[i]));
+                    *numerical_parameter = stoi(string(argv[i]));
                 }
             } catch(const exception& e) {
                 cerr << "Error: " << e.what() << endl;
@@ -136,7 +134,7 @@ bool Model::parseArguments(int argc, char* argv[]) {
 
 void Model::printHelp() {
     help = true;
-    cerr << "Usage: " << fname << "ax ay b c <option(s)>" << endl
+    cerr << "Usage: " << fname << "ax ay b c <option(s)>\n"
          << "\t-p,--physics <ax> <ay> <b> <c> \tSet physics parameters (default: ax=10, ay=0, b=0, c=0)\n"
          << "\t-g,--geometry <Lx> <Ly> <x0> <y0> \tSet length and initial position of velocity field considered (default: Lx=10, Ly=10, x0=0, y0=0)\n"
          << "\t-t,--time <end time in seconds> \tSet simulation end time (default: 1s)\n"
