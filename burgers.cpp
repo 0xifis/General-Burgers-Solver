@@ -3,21 +3,32 @@
 #include "Model.h"
 //#include "Burgers.h"
 
+using namespace std;
+
 int main(int argc, char* argv[]) {
-    // if "-h" is present, run help function
     Model m(argc, argv);
-//        Burgers b(m);
+    if (m.isVerbose()) m.printParameters();
+    if (m.isValid()) {
+        cout << "Now running the model with given parameters." << endl;
+//                Burgers b(m);
 
-    // Call code to initialise the problem here
+        // Call code to initialise the problem here
 
-    typedef std::chrono::high_resolution_clock hrc;
-    typedef std::chrono::milliseconds ms;
-    hrc::time_point start = hrc::now();
+        typedef std::chrono::high_resolution_clock hrc;
+        typedef std::chrono::milliseconds ms;
+        hrc::time_point start = hrc::now();
 
-    // Call code to perform time integration here
+        // Call code to perform time integration here
 
-    hrc::time_point end = hrc::now();
+        hrc::time_point end = hrc::now();
 
-    // Calculate final energy and write output
+        // Calculate final energy and write output
+
+    } else {
+        cerr << "The model was not run as it is not valid with the given parameters." << endl
+             << "Please choose a different set of parameters and try again or use '-h' flag for the help message."
+             << endl;
+    }
+
     return 0;
 }

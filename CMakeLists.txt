@@ -3,4 +3,4 @@ project(Coursework)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(Coursework burgers.cpp)
+add_executable(Coursework burgers.cpp Model.cpp)
