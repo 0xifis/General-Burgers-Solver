@@ -87,7 +87,7 @@ void Model::printHelp() {
     Model::help = true;
     cerr << "Usage: " << fname << "ax ay b c <option(s)>\n"
          << "\t-p,--physics <ax> <ay> <b> <c> \tSet physics parameters (default: ax=10, ay=0, b=0, c=0)\n"
-         << "\t-g,--geometry <Lx> <Ly> <x0> <y0> \tSet length and initial position of velocity field considered (default: Lx=10, Ly=10, x0=0, y0=0)\n"
+         << "\t-g,--geometry <L> \tSet the length of velocity field considered (default: L=10)\n"
          << "\t-t,--time <end time in seconds> \tSet simulation end time (default: 1s)\n"
          << "\t-n,--numeric <Nx> <Ny> <Nt> \tSet simulation numeric parameters (default: Nx=20, Ny=20, Nt=20)\n"
          << "\t-h,--help\t\t\t\tShow this help message\n"

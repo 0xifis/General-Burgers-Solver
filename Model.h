@@ -57,8 +57,8 @@ class Model {
 	    double          T    =   1;
 
 	    // Numeric
-	    unsigned int    Nx   =   20;
-	    unsigned int    Ny   =   20;
+	    unsigned int    Nx   =   21;
+	    unsigned int    Ny   =   21;
 	    unsigned int    Nt   =   40;
 	    double          dx   =   Lx/(Nx-1);
 	    double          dy   =   Ly/(Ny-1);
