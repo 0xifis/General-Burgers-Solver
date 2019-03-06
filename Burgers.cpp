@@ -1,5 +1,5 @@
 #include "Burgers.h"
-#include "math.h"
+#include <blaze/Math.h>
 #include <fstream>
 
 Burgers::Burgers(Model *m_) : m(m_) {
@@ -89,4 +89,8 @@ void Burgers::integrateVelocityField() {
         u_i_j = dt * (U34 + U23);
         v_i_j = dt * (V34 + V23);
     }
+}
+
+double Burgers::fieldEnergy() {
+    return 0.5*sum(blaze::sqrt(u*trans(u) + v*trans(v)))*m->getDx()*m->getDy();
 }

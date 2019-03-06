@@ -14,6 +14,7 @@ class Burgers {
         void initializeVelocityField();
         void printVelocityField();
         void integrateVelocityField();
+        double fieldEnergy();
 
     private:
         Model* m;
