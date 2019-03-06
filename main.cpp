@@ -22,6 +22,10 @@ int main(int argc, char* argv[]) {
         b.integrateVelocityField();
 
         hrc::time_point end = hrc::now();
+    
+        cout << "Integration took "
+                  << chrono::duration_cast<chrono::microseconds>(end - start).count()
+                  << "us.\n";
 
         // Calculate final energy and write output
         cout << "Energy: " << b.fieldEnergy() << endl;
