@@ -25,6 +25,8 @@ int main(int argc, char* argv[]) {
 
         // Calculate final energy and write output
 
+        b.printVelocityField();
+
     } else {
         cerr << "The model was not run as it is not valid with the given parameters." << endl
              << "Please choose a different set of parameters and try again or use '-h' flag for the help message."
