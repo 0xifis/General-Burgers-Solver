@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
         hrc::time_point start = hrc::now();
 
         // Call code to perform time integration here
+        b.integrateVelocityField();
 
         hrc::time_point end = hrc::now();
 

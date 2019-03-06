@@ -83,11 +83,11 @@ void Burgers::integrateVelocityField() {
         U34 = p_xi_j * u_xi_j + p_ix_j * u_ix_j + p_i_j * u_i_j + p_i_xj * u_i_xj + p_i_jx * u_i_jx;
         U23 = -1.0 * b / dx * u_i_j % (u_i_j - u_xi_j) - b / dy * v_i_j % (u_i_j - u_i_xj);
     
-        u_i_j = U34 + U23;
+        u_i_j = dt * (U34 + U23);
         
         V34 = p_xi_j*v_xi_j + p_ix_j*v_ix_j + p_i_j*v_i_j + p_i_xj*v_i_xj + p_i_jx*v_i_jx;
-        V23 = -1.0 * b / dx * u_i_j % (v_i_j - v_xi_j) - b / dy * v_i_j % (v_i_j - v_i_xj);
+        V23 = ( -1.0 * b / dx ) * u_i_j % (v_i_j - v_xi_j) - ( b / dy * v_i_j ) % (v_i_j - v_i_xj);
         
-        v_i_j = V34 + V23;
+        v_i_j = dt * (V34 + V23);
     }
 }
