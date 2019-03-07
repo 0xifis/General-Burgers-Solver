@@ -79,7 +79,11 @@ void Burgers::integrateVelocityField() {
     const double p_i_jx = c / dy / dy;
     
     blaze::DynamicMatrix<double> U34 (nsx, nsy), U23 (nsx, nsy), V34 (nsx, nsy), V23 (nsx, nsy);
-    
+	
+	typedef std::chrono::high_resolution_clock hrc;
+	typedef std::chrono::milliseconds ms;
+    hrc::time_point loop_start = hrc::now();
+	
     for (int i = 1; i <= Nt; ++i) {
         U34 = p_xi_j * u_xi_j + p_ix_j * u_ix_j + p_i_j * u_i_j + p_i_xj * u_i_xj + p_i_jx * u_i_jx;
         U23 = -1.0 * b / dx * u_i_j % (u_i_j - u_xi_j) - b / dy * v_i_j % (u_i_j - u_i_xj);
@@ -89,6 +93,11 @@ void Burgers::integrateVelocityField() {
     
         u_i_j = dt * (U34 + U23);
         v_i_j = dt * (V34 + V23);
+		
+		if (i%10 == 0) 
+			cout << "Time Step: " << i << " of " << Nt
+				 << "\tRunning time: " << chrono::duration_cast<chrono::milliseconds>(hrc::now() - loop_start).count()
+				 << endl;
     }
     cout << "\n\nDone\n\n";
 }
