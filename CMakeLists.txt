@@ -1,16 +1,18 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.5)
 project(Coursework)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 set(CMAKE_CXX_STANDARD 14)
 
-find_package( blas )
-
-find_package( blaze )
-if( blaze_FOUND )
-    add_library( blaze_target INTERFACE )
-    target_link_libraries( blaze_target INTERFACE blaze::blaze )
-endif()
-
 add_executable(burgers main.cpp Model.cpp Burgers.cpp)
+
+find_package( BLAS REQUIRED )
+target_link_libraries(burgers ${BLAS_LIBRARIES})
+
+include_directories(/home/vr616/Downloads/blaze-3.5)
+find_package( blaze REQUIRED )
+add_library( blaze_target INTERFACE )
+target_link_libraries( blaze_target INTERFACE blaze::blaze )
+
+target_link_libraries( burgers ${BLAZE_LIBRARIES} )
