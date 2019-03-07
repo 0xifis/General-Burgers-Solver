@@ -10,7 +10,7 @@ add_executable(burgers main.cpp Model.cpp Burgers.cpp)
 find_package( BLAS REQUIRED )
 target_link_libraries(burgers ${BLAS_LIBRARIES})
 
-include_directories(/home/vr616/Downloads/blaze-3.5)
+include_directories(./includes)
 find_package( blaze REQUIRED )
 add_library( blaze_target INTERFACE )
 target_link_libraries( blaze_target INTERFACE blaze::blaze )
