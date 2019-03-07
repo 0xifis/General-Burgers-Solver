@@ -43,7 +43,7 @@ class Model {
         bool validateParameters();
 
         // Meta Parameters
-	    bool            verbose;
+	    bool            verbose = false;
         bool            help;
         bool            valid = false;
         string          fname;
