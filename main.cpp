@@ -16,6 +16,7 @@ int main(int argc, char* argv[]) {
 
         typedef std::chrono::high_resolution_clock hrc;
         typedef std::chrono::milliseconds ms;
+        
         hrc::time_point start = hrc::now();
 
         // Call code to perform time integration here
@@ -24,7 +25,7 @@ int main(int argc, char* argv[]) {
         hrc::time_point end = hrc::now();
     
         cout << "Integration took "
-                  << chrono::duration_cast<chrono::microseconds>(end - start).count()
+                  << chrono::duration_cast<ms>(end - start).count()
                   << "us.\n";
 
         // Calculate final energy and write output
