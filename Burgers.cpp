@@ -79,7 +79,8 @@ void Burgers::integrateVelocityField() {
     const double p_i_jx = c / dy / dy;
     
     blaze::DynamicMatrix<double> U34 (nsx, nsy), U23 (nsx, nsy), V34 (nsx, nsy), V23 (nsx, nsy);
-    for (int i = 0; i < Nt; ++i) {
+    
+    for (int i = 1; i <= Nt; ++i) {
         U34 = p_xi_j * u_xi_j + p_ix_j * u_ix_j + p_i_j * u_i_j + p_i_xj * u_i_xj + p_i_jx * u_i_jx;
         U23 = -1.0 * b / dx * u_i_j % (u_i_j - u_xi_j) - b / dy * v_i_j % (u_i_j - u_i_xj);
         
@@ -89,6 +90,7 @@ void Burgers::integrateVelocityField() {
         u_i_j = dt * (U34 + U23);
         v_i_j = dt * (V34 + V23);
     }
+    cout << "\n\nDone\n\n";
 }
 
 double Burgers::fieldEnergy() {
