@@ -125,7 +125,7 @@ double Burgers::fieldEnergy() {
     const double dx = m->getDx();
     const double dy = m->getDy();
     for(int i = 0; i < Nx*Ny; ++i)  {
-        energy += 0.5 * (u[i]*u[i]*dx + v[i]*v[i]*dy);
+        energy += 0.5 * (u[i]*u[i] + v[i]*v[i]) * dx * dy;
     }
     return energy;
 }
