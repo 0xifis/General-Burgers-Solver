@@ -41,5 +41,6 @@
 cmake-build-debug/
 build/
 
-.idea/
-.idea/workspace.xm
+.idea/usage.statistics.xml
+.idea/tasks.xml
+.idea/workspace.xml
