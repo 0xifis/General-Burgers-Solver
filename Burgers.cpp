@@ -7,9 +7,7 @@
 
 using namespace std;
 
-Burgers::Burgers(Model *m_) : m(m_)  {
-    Nx = m->getNx();
-    Ny = m->getNy();
+Burgers::Burgers(Model *m_) : m(m_), Nx(m->getNx()), Ny(m->getNy()) {
     u = new double[Nx*Ny];
     v = new double[Nx*Ny];
 }
@@ -62,8 +60,6 @@ void Burgers::serializeMatrix(double *m, ofstream* dataFile) {
     }
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-compare"
 void Burgers::integrateVelocityField() {
     const double Nt = m->getNt();
     const double dx = m->getDx();
@@ -87,8 +83,8 @@ void Burgers::integrateVelocityField() {
     hrc::time_point loop_start = hrc::now();
 	
     for (int t = 1; t <= Nt; ++t) {
-        for(int row = lbound; row <= rbound; ++row) {
-            for(int col = tbound; col <= bbound; ++col) {
+        for(unsigned int row = lbound; row <= rbound; ++row) {
+            for(unsigned int col = tbound; col <= bbound; ++col) {
                 i_j = row*Ny+col;
                 i_jx= i_j + 1;
                 i_xj= i_j - 1;
@@ -115,13 +111,12 @@ void Burgers::integrateVelocityField() {
     }
     cout << "\n\nDone\n\n";
 }
-#pragma clang diagnostic pop
 
 double Burgers::fieldEnergy() {
     double energy = 0.0;
     const double dx = m->getDx();
     const double dy = m->getDy();
-    for (int i = 0; i < Nx * Ny; ++i) {
+    for (unsigned int i = 0; i < Nx * Ny; ++i) {
         energy += 0.5 * (u[i] * u[i] + v[i] * v[i]) * dx * dy;
     }
     return energy;
