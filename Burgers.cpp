@@ -107,6 +107,7 @@ void Burgers::integrateVelocityField() {
 			cout << "Time Step: " << t << " of " << Nt
 				 << "\tRunning time: " << chrono::duration_cast<chrono::milliseconds>(hrc::now() - loop_start).count()
 				 << "ms"
+				 << "\tl: " << lbound << " r: " << rbound << " t: " << tbound << " b: " << bbound
 				 << endl;
     }
     cout << "\n\nDone\n\n";
@@ -124,14 +125,14 @@ double Burgers::fieldEnergy() {
 
 void Burgers::adjustBounds(unsigned int col, unsigned int row) {
     if(lbound > col) lbound = col;
-    if(rbound < col) lbound = col;
+    if(rbound < col) rbound = col;
     if(tbound > row) tbound = row;
     if(bbound < row) bbound = row;
 }
 
 void Burgers::rollbackBounds() {
     if(lbound > 1) lbound--;
-    if(rbound < Nx-1) rbound++;
-    if(tbound > 0) tbound--;
-    if(bbound < Ny-1) bbound++;
+    if(rbound < Nx-2) rbound++;
+    if(tbound > 1) tbound--;
+    if(bbound < Ny-2) bbound++;
 }
