@@ -1,13 +1,7 @@
 #ifndef BURGERS_H
 #define BURGERS_H
 
-#include <iostream>
-#include <string>
 #include "Model.h"
-#include <blaze/Math.h>
-#include <chrono>
-using namespace std;
-
 
 class Burgers {
     public:
@@ -23,7 +17,7 @@ class Burgers {
         double* v;
         unsigned int Nx, Ny;
         double x(int col), y(int row);
-        string printMatrix(size_t Nx, size_t Ny, blaze::DynamicMatrix<double, blaze::columnMajor>* m);
+        void serializeMatrix(double* m, ofstream* dataFile);
         double r_thresh = 1;
 };
 
