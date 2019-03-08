@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 
         // Call code to initialise the problem here
         b.initializeVelocityField();
-
+//
         typedef std::chrono::high_resolution_clock hrc;
         typedef std::chrono::milliseconds ms;
         
