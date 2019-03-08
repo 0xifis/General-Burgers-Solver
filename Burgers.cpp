@@ -27,17 +27,17 @@ double Burgers::y(int row) {
 void Burgers::initializeVelocityField() {
     
     double r, rb;
-    for(unsigned int row=0; row < Nx; ++row ) {
-        for(unsigned int col=0; col < Ny; ++col) {
+    for(unsigned int col=0; col < Nx; ++col ) {
+        for(unsigned int row=0; row < Ny; ++row) {
             r = sqrt(pow(x(col),2)+pow(y(row),2));
             if (r < r_thresh) {
                 rb = 2*pow(1-r,4)*(4*r+1);
-                adjustBounds(col,row);
+                adjustBounds(row,col);
             } else {
                 rb = 0.0;
             }
-            u[row*Ny+col] = rb;
-            v[row*Ny+col] = rb;
+            u[col*Ny+row] = rb;
+            v[col*Ny+row] = rb;
         }
     }
 }
@@ -53,7 +53,7 @@ void Burgers::printVelocityField() {
 
 void Burgers::serializeMatrix(double *m, ofstream* dataFile) {
     for( size_t col=0; col<Nx; ++col) {
-        for( size_t row=0; row<Nx; ++row) {
+        for( size_t row=0; row<Ny; ++row) {
             *dataFile << (col==0 ? ' ' : ',') << m[row*Ny+col];
         }
         *dataFile << '\n';
@@ -99,10 +99,11 @@ void Burgers::integrateVelocityField() {
     
                 u[i_j] = dt * tempu;
                 v[i_j] = dt * tempv;
+                if(fabs(u[i_j]) > 1e-5 || fabs(v[i_j]) > 1e-5) adjustBounds(row, col);
             }
         }
-        rollbackBounds();
-		
+//        rollbackBounds();
+
 		if (t%10 == 0)
 			cout << "Time Step: " << t << " of " << Nt
 				 << "\tRunning time: " << chrono::duration_cast<chrono::milliseconds>(hrc::now() - loop_start).count()
@@ -123,11 +124,11 @@ double Burgers::fieldEnergy() {
     return energy;
 }
 
-void Burgers::adjustBounds(unsigned int col, unsigned int row) {
-    if(lbound > col) lbound = col;
-    if(rbound < col) rbound = col;
-    if(tbound > row) tbound = row;
-    if(bbound < row) bbound = row;
+void Burgers::adjustBounds(unsigned int row, unsigned int col) {
+    if(lbound >= col) lbound = col - 1;
+    if(rbound <= col) rbound = col + 1;
+    if(tbound >= row) tbound = row - 1;
+    if(bbound <= row) bbound = row + 1;
 }
 
 void Burgers::rollbackBounds() {
