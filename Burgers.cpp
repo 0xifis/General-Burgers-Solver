@@ -121,6 +121,11 @@ void Burgers::integrateVelocityField() {
 #pragma clang diagnostic pop
 
 double Burgers::fieldEnergy() {
-    return 0.0;
-//    return 0.5*sum(blaze::sqrt(u*trans(u) + v*trans(v)))*m->getDx()*m->getDy();
+    double energy = 0.0;
+    const double dx = m->getDx();
+    const double dy = m->getDy();
+    for(int i = 0; i < Nx*Ny; ++i)  {
+        energy += 0.5 * (u[i]*u[i]*dx + v[i]*v[i]*dy);
+    }
+    return energy;
 }

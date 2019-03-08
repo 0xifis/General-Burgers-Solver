@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
                   << "us.\n";
 
         // Calculate final energy and write output
-//        cout << "Energy: " << b.fieldEnergy() << endl;
+        cout << "Energy: " << b.fieldEnergy() << endl;
 //        b.printVelocityField();
 
     } else {
