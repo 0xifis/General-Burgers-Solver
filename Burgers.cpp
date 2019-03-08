@@ -7,17 +7,6 @@
 
 using namespace std;
 
-#define F77NAME(x) x##_
-extern "C" {
-/* Level 1 functions */
-// Dot product X.Y
-double F77NAME(ddot)(
-        const int &n,
-        const double *x, const int &incx,
-        const double *y, const int &incy
-);
-}
-
 Burgers::Burgers(Model *m_) : m(m_)  {
     Nx = m->getNx();
     Ny = m->getNy();
@@ -129,10 +118,13 @@ void Burgers::integrateVelocityField() {
 #pragma clang diagnostic pop
 
 double Burgers::fieldEnergy() {
-    const int N = Nx*Ny;
+    double energy = 0.0;
     const double dx = m->getDx();
     const double dy = m->getDy();
-    return (0.5 * (F77NAME(ddot)(N,u,1,u,1) + F77NAME(ddot)(N,v,1,v,1)) * dx * dy);
+    for (int i = 0; i < Nx * Ny; ++i) {
+        energy += 0.5 * (u[i] * u[i] + v[i] * v[i]) * dx * dy;
+    }
+    return energy;
 }
 
 void Burgers::adjustBounds(unsigned int col, unsigned int row) {
