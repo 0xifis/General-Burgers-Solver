@@ -19,8 +19,10 @@ class Burgers {
 
     private:
         Model* m;
-        blaze::DynamicMatrix<double,blaze::columnMajor> u, v;
-        double x(size_t col), y(size_t row);
+        double* u;
+        double* v;
+        const unsigned int Nx, Ny;
+        double x(int col), y(int row);
         string printMatrix(size_t Nx, size_t Ny, blaze::DynamicMatrix<double, blaze::columnMajor>* m);
         double r_thresh = 1;
 };
