@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 
         // Call code to initialise the problem here
         b.initializeVelocityField();
-
+//
         typedef std::chrono::high_resolution_clock hrc;
         typedef std::chrono::milliseconds ms;
         
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
         // Calculate final energy and write output
         cout << "Energy: " << b.fieldEnergy() << endl;
-        b.printVelocityField();
+//        b.printVelocityField();
 
     } else {
         cerr << "The model was not run as it is not valid with the given parameters." << endl
