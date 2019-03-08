@@ -7,6 +7,17 @@
 
 using namespace std;
 
+#define F77NAME(x) x##_
+extern "C" {
+/* Level 1 functions */
+// Dot product X.Y
+double F77NAME(ddot)(
+        const int &n,
+        const double *x, const int &incx,
+        const double *y, const int &incy
+);
+}
+
 Burgers::Burgers(Model *m_) : m(m_)  {
     Nx = m->getNx();
     Ny = m->getNy();
@@ -27,12 +38,17 @@ double Burgers::y(int row) {
 }
 
 void Burgers::initializeVelocityField() {
-    // use a submatrix here
+    
     double r, rb;
-    for( int row=0; row<Nx; ++row ) {
-        for( int col=0; col<Ny; ++col) {
+    for(unsigned int row=0; row < Nx; ++row ) {
+        for(unsigned int col=0; col < Ny; ++col) {
             r = sqrt(pow(x(col),2)+pow(y(row),2));
-            rb = (r < r_thresh ? 2*pow(1-r,4)*(4*r+1) : 0.0);
+            if (r < r_thresh) {
+                rb = 2*pow(1-r,4)*(4*r+1);
+                adjustBounds(col,row);
+            } else {
+                rb = 0.0;
+            }
             u[row*Ny+col] = rb;
             v[row*Ny+col] = rb;
         }
@@ -82,8 +98,8 @@ void Burgers::integrateVelocityField() {
     hrc::time_point loop_start = hrc::now();
 	
     for (int t = 1; t <= Nt; ++t) {
-        for(int row = 1; row < Nx-1; ++row) {
-            for(int col = 1; col < Ny-1; ++col) {
+        for(int row = lbound; row <= rbound; ++row) {
+            for(int col = tbound; col <= bbound; ++col) {
                 i_j = row*Ny+col;
                 i_jx= i_j + 1;
                 i_xj= i_j - 1;
@@ -100,6 +116,7 @@ void Burgers::integrateVelocityField() {
                 v[i_j] = dt * tempv;
             }
         }
+        rollbackBounds();
 		
 		if (t%10 == 0)
 			cout << "Time Step: " << t << " of " << Nt
@@ -112,11 +129,22 @@ void Burgers::integrateVelocityField() {
 #pragma clang diagnostic pop
 
 double Burgers::fieldEnergy() {
-    double energy = 0.0;
+    const int N = Nx*Ny;
     const double dx = m->getDx();
     const double dy = m->getDy();
-    for(int i = 0; i < Nx*Ny; ++i)  {
-        energy += 0.5 * (u[i]*u[i] + v[i]*v[i]) * dx * dy;
-    }
-    return energy;
+    return (0.5 * (F77NAME(ddot)(N,u,1,u,1) + F77NAME(ddot)(N,v,1,v,1)) * dx * dy);
+}
+
+void Burgers::adjustBounds(unsigned int col, unsigned int row) {
+    if(lbound > col) lbound = col;
+    if(rbound < col) lbound = col;
+    if(tbound > row) tbound = row;
+    if(bbound < row) bbound = row;
+}
+
+void Burgers::rollbackBounds() {
+    if(lbound > 1) lbound--;
+    if(rbound < Nx-1) rbound++;
+    if(tbound > 0) tbound--;
+    if(bbound < Ny-1) bbound++;
 }

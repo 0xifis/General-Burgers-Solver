@@ -19,6 +19,13 @@ class Burgers {
         double x(int col), y(int row);
         void serializeMatrix(double* m, ofstream* dataFile);
         double r_thresh = 1;
+        unsigned int lbound = Nx;
+        unsigned int rbound = 0;
+        unsigned int tbound = Ny;
+        unsigned int bbound = 0;
+        void adjustBounds(unsigned int Nx, unsigned int Ny);
+    
+    void rollbackBounds();
 };
 
 #endif
