@@ -1,6 +1,9 @@
 #include "Burgers.h"
-#include <blaze/Math.h>
+#include <iostream>
 #include <fstream>
+#include <cmath>
+
+using namespace std;
 
 Burgers::Burgers(Model *m_) : m(m_)  {
     Nx = m->getNx();
@@ -35,26 +38,26 @@ void Burgers::initializeVelocityField() {
 }
 
 void Burgers::printVelocityField() {
-    const auto dotStep = static_cast<int> (floor(Nx / 10.0));
     const char filename[] = "velocity_u.csv";
     cout << "Writing velocity field data to file - " << filename << endl;
     ofstream dataFile (filename, fstream::trunc);
-    for( size_t col=0; col<Nx; ++col) {
-        for( size_t row=0; row<Nx; ++row) {
-            dataFile << (col==0 ? ' ' : ',') << u[row*Ny+col];
-        }
-        dataFile << '\n';
-        if (col%dotStep == 0) cout << '.';
-    }
+    serializeMatrix(u, &dataFile);
     dataFile.close();
     cout << "\nDone :)" << endl;
+}
+
+void Burgers::serializeMatrix(double *m, ofstream* dataFile) {
+    for( size_t col=0; col<Nx; ++col) {
+        for( size_t row=0; row<Nx; ++row) {
+            *dataFile << (col==0 ? ' ' : ',') << m[row*Ny+col];
+        }
+        *dataFile << '\n';
+    }
 }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-compare"
 void Burgers::integrateVelocityField() {
-//    const auto nsx = Nx;
-//    const auto nsy = Ny;
     const double Nt = m->getNt();
     const double dx = m->getDx();
     const double dy = m->getDy();
@@ -63,18 +66,6 @@ void Burgers::integrateVelocityField() {
     const double ay  = m->getAy();
     const double b  = m->getB();
     const double c  = m->getC();
-
-//    auto u_ix_j = blaze::submatrix(u, 1UL, 2UL, nsx, nsy);
-//    auto u_xi_j = blaze::submatrix(u, 1UL, 0UL, nsx, nsy);
-//    auto u_i_j  = blaze::submatrix(u, 1UL, 1UL, nsx, nsy);
-//    auto u_i_xj = blaze::submatrix(u, 0UL, 1UL, nsx, nsy);
-//    auto u_i_jx = blaze::submatrix(u, 2UL, 1UL, nsx, nsy);
-//
-//    auto v_ix_j = blaze::submatrix(v, 1UL, 2UL, nsx, nsy);
-//    auto v_xi_j = blaze::submatrix(v, 1UL, 0UL, nsx, nsy);
-//    auto v_i_j  = blaze::submatrix(v, 1UL, 1UL, nsx, nsy);
-//    auto v_i_xj = blaze::submatrix(v, 0UL, 1UL, nsx, nsy);
-//    auto v_i_jx = blaze::submatrix(v, 2UL, 1UL, nsx, nsy);
     
     const double p_xi_j = c / dx / dx + ax / dx;
     const double p_ix_j = c / dx / dx;
@@ -85,8 +76,6 @@ void Burgers::integrateVelocityField() {
     int i_j, ix_j, xi_j, i_jx, i_xj;
     double tempu, tempv;
     
-//    blaze::DynamicMatrix<double> U34 (nsx, nsy), U23 (nsx, nsy), V34 (nsx, nsy), V23 (nsx, nsy);
-	
 	typedef std::chrono::high_resolution_clock hrc;
     hrc::time_point loop_start = hrc::now();
 	
