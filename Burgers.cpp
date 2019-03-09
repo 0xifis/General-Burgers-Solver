@@ -83,9 +83,9 @@ void Burgers::integrateVelocityField() {
     hrc::time_point loop_start = hrc::now();
 	
     for (int t = 1; t <= Nt; ++t) {
-        for(unsigned int row = lbound; row <= rbound; ++row) {
-            for(unsigned int col = tbound; col <= bbound; ++col) {
-                i_j = row*Ny+col;
+        for(unsigned int col = lbound; col <= rbound; ++col) {
+            for(unsigned int row = tbound; row <= bbound; ++row) {
+                i_j = col*Nx+row;
                 i_jx= i_j + 1;
                 i_xj= i_j - 1;
                 ix_j= i_j + Ny;
@@ -99,7 +99,7 @@ void Burgers::integrateVelocityField() {
     
                 u[i_j] = dt * tempu;
                 v[i_j] = dt * tempv;
-                if(fabs(u[i_j]) > 1e-5 || fabs(v[i_j]) > 1e-5) adjustBounds(row, col);
+                if(fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
             }
         }
 //        rollbackBounds();
