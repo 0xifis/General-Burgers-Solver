@@ -30,7 +30,7 @@ void Burgers::initializeVelocityField() {
     for(unsigned int col=0; col < Nx; ++col ) {
         for(unsigned int row=0; row < Ny; ++row) {
             r = sqrt(pow(x(col),2)+pow(y(row),2));
-            if (r < r_thresh) {
+            if (r <= r_thresh) {
                 rb = 2*pow(1-r,4)*(4*r+1);
                 adjustBounds(row,col);
             } else {
@@ -43,18 +43,25 @@ void Burgers::initializeVelocityField() {
 }
 
 void Burgers::printVelocityField() {
-    const char filename[] = "velocity_u.csv";
-    cout << "Writing velocity field data to file - " << filename << endl;
-    ofstream dataFile (filename, fstream::trunc);
-    serializeMatrix(u, &dataFile);
-    dataFile.close();
+    const char ufilename[] = "velocity_u.csv";
+    cout << "Writing velocity field data to file - " << ufilename << endl;
+    ofstream udataFile (ufilename, fstream::trunc);
+    serializeMatrix(u, &udataFile);
+    udataFile.close();
+    
+    const char vfilename[] = "velocity_v.csv";
+    cout << "Writing velocity field data v to file - " << vfilename << endl;
+    ofstream vdataFile (vfilename, fstream::trunc);
+    serializeMatrix(u, &vdataFile);
+    vdataFile.close();
+    
     cout << "\nDone :)" << endl;
 }
 
 void Burgers::serializeMatrix(double *m, ofstream* dataFile) {
-    for( size_t col=0; col<Nx; ++col) {
-        for( size_t row=0; row<Ny; ++row) {
-            *dataFile << (col==0 ? ' ' : ',') << m[row*Ny+col];
+    for( unsigned int row=0; row<Ny; ++row) {
+        for( unsigned int col=0; col<Nx; ++col) {
+            *dataFile << (col==0 ? ' ' : ',') << m[col*Ny+row];
         }
         *dataFile << '\n';
     }
@@ -72,7 +79,7 @@ void Burgers::integrateVelocityField() {
     
     const double p_xi_j = c / dx / dx + ax / dx;
     const double p_ix_j = c / dx / dx;
-    const double p_i_j  = -2.0*c*(1/dx/dx + 1/dy/dy) - ax/dx - ay/dy + 1/dt;
+    const double p_i_j  = -2.0*c*(1.0/dx/dx + 1.0/dy/dy) - ax/dx - ay/dy + 1.0/dt;
     const double p_i_xj = c / dy / dy + ay / dy;
     const double p_i_jx = c / dy / dy;
     
@@ -81,27 +88,49 @@ void Burgers::integrateVelocityField() {
     
 	typedef std::chrono::high_resolution_clock hrc;
     hrc::time_point loop_start = hrc::now();
-	
+    
+    double* temp;
+    auto* un = new double[Nx*Ny];
+    auto* vn = new double[Nx*Ny];
+    
     for (int t = 1; t <= Nt; ++t) {
         for(unsigned int col = lbound; col <= rbound; ++col) {
             for(unsigned int row = tbound; row <= bbound; ++row) {
-                i_j = col*Nx+row;
+                i_j = col*Ny+row;
                 i_jx= i_j + 1;
                 i_xj= i_j - 1;
                 ix_j= i_j + Ny;
                 xi_j= i_j - Ny;
                 
-                tempu = p_xi_j * u[xi_j] + p_ix_j * u[ix_j] + p_i_j * u[i_j] + p_i_xj * u[i_xj] + p_i_jx * u[i_jx];
-                tempu+= -1.0 * b / dx * u[i_j] * (u[i_j]- u[xi_j]) - b / dy * v[i_j] * (u[i_j] - u[i_xj]);
+                tempu = p_xi_j * u[xi_j] +
+                        p_ix_j * u[ix_j] +
+                        p_i_j * u[i_j] +
+                        p_i_xj * u[i_xj] +
+                        p_i_jx * u[i_jx];
+                tempu+= -1.0 * b / dx   * u[i_j] * (u[i_j] - u[xi_j]) -
+                        b / dy          * v[i_j] * (u[i_j] - u[i_xj]);
     
-                tempv = p_xi_j * v[xi_j] + p_ix_j * v[ix_j] + p_i_j * v[i_j] + p_i_xj * v[i_xj] + p_i_jx * v[i_jx];
-                tempv+= (-1.0 * b / dx) * u[i_j] * (v[i_j] - v[xi_j]) - (b / dy * v[i_j]) * (v[i_j] - v[i_xj]);
+                tempv = p_xi_j * v[xi_j] +
+                        p_ix_j * v[ix_j] +
+                        p_i_j * v[i_j] +
+                        p_i_xj * v[i_xj] +
+                        p_i_jx * v[i_jx];
+                tempv+= (-1.0 * b / dx) * u[i_j] * (v[i_j] - v[xi_j]) -
+                        (b / dy )       * v[i_j] * (v[i_j] - v[i_xj]);
     
-                u[i_j] = dt * tempu;
-                v[i_j] = dt * tempv;
+                un[i_j] = dt * tempu;
+                vn[i_j] = dt * tempv;
                 if(fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
             }
         }
+        temp = un;
+        un = u;
+        u = temp;
+    
+        temp = vn;
+        vn = v;
+        v = temp;
+        
 //        rollbackBounds();
 
 		if (t%10 == 0)
@@ -125,10 +154,14 @@ double Burgers::fieldEnergy() {
 }
 
 void Burgers::adjustBounds(unsigned int row, unsigned int col) {
-    if(lbound >= col) lbound = col - 1;
-    if(rbound <= col) rbound = col + 1;
-    if(tbound >= row) tbound = row - 1;
-    if(bbound <= row) bbound = row + 1;
+    if(col <  Nx-2 && col > 1) {
+        if (lbound >= col) lbound = col - 1;
+        if (rbound <= col) rbound = col + 1;
+    }
+    if(row <  Ny-2 && row > 1) {
+        if (tbound >= row) tbound = row - 1;
+        if (bbound <= row) bbound = row + 1;
+    }
 }
 
 void Burgers::rollbackBounds() {
