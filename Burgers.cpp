@@ -89,7 +89,6 @@ void Burgers::integrateVelocityField() {
 	typedef std::chrono::high_resolution_clock hrc;
     hrc::time_point loop_start = hrc::now();
     
-    double* temp;
     auto* un = new double[Nx*Ny];
     auto* vn = new double[Nx*Ny];
     
@@ -123,13 +122,8 @@ void Burgers::integrateVelocityField() {
                 if(fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
             }
         }
-        temp = un;
-        un = u;
-        u = temp;
-    
-        temp = vn;
-        vn = v;
-        v = temp;
+        swap(un, u);
+        swap(vn, v);
         
 //        rollbackBounds();
 
@@ -141,6 +135,8 @@ void Burgers::integrateVelocityField() {
 				 << endl;
     }
     cout << "\n\nDone\n\n";
+    delete[] vn;
+    delete[] un;
 }
 
 double Burgers::fieldEnergy() {
