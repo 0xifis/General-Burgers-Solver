@@ -4,7 +4,6 @@
 #include <cmath>
 #include <chrono>
 
-
 using namespace std;
 
 Burgers::Burgers(Model *m_) : m(m_), Nx(m->getNx()), Ny(m->getNy()) {
@@ -91,8 +90,8 @@ void Burgers::integrateVelocityField() {
     
     auto* un = new double[Nx*Ny];
     auto* vn = new double[Nx*Ny];
-    
     for (int t = 1; t <= Nt; ++t) {
+        #pragma omp parallel for private(i_j, ix_j, xi_j, i_jx, i_xj, tempu, tempv) ordered
         for(unsigned int col = lbound; col <= rbound; ++col) {
             for(unsigned int row = tbound; row <= bbound; ++row) {
                 i_j = col*Ny+row;
@@ -119,7 +118,7 @@ void Burgers::integrateVelocityField() {
     
                 un[i_j] = dt * tempu;
                 vn[i_j] = dt * tempv;
-                if(fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
+                if (fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
             }
         }
         swap(un, u);
