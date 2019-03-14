@@ -45,7 +45,7 @@ bool Model::parseArguments(int argc, char* argv[]) {
                 return false;
             }
         }
-        else if (arg == "-n" || arg == "--numeric") {
+        else if (arg == "-s" || arg == "--steps") {
             try {
                 unsigned int* numerical_parameters[] = {&(Model::Nx), &(Model::Ny), &(Model::Nt)};
                 for (auto &numerical_parameter : numerical_parameters) {
@@ -54,7 +54,7 @@ bool Model::parseArguments(int argc, char* argv[]) {
                 }
             } catch(const exception& e) {
                 cerr << "Error: " << e.what() << endl;
-                cerr << "-n/--numeric option requires three positive arguments of type int (Nx, Ny, Nt)." << endl;
+                cerr << "-s/--steps option requires three positive arguments of type int (Nx, Ny, Nt)." << endl;
                 return false;
             }
         }
@@ -89,7 +89,7 @@ void Model::printHelp() {
          << "\t-p,--physics <ax> <ay> <b> <c> \tSet physics parameters (default: ax=10, ay=0, b=0, c=0)\n"
          << "\t-g,--geometry <L> \tSet the length of velocity field considered (default: L=10)\n"
          << "\t-t,--time <end time in seconds> \tSet simulation end time (default: 1s)\n"
-         << "\t-n,--numeric <Nx> <Ny> <Nt> \tSet simulation numeric parameters (default: Nx=20, Ny=20, Nt=20)\n"
+         << "\t-s,--steps <Nx> <Ny> <Nt> \tSet simulation numeric parameters (default: Nx=20, Ny=20, Nt=20)\n"
          << "\t-h,--help\t\t\t\tShow this help message\n"
          << "\t-v,--verbose\t\t\t\tRun in verbose mode\n"
          << endl;

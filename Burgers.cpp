@@ -3,6 +3,8 @@
 #include <fstream>
 #include <cmath>
 #include <chrono>
+#include "mpi.h"
+#include <stdio.h>
 
 using namespace std;
 
@@ -24,7 +26,6 @@ double Burgers::y(int row) {
 }
 
 void Burgers::initializeVelocityField() {
-    
     double r, rb;
     for(unsigned int col=0; col < Nx; ++col ) {
         for(unsigned int row=0; row < Ny; ++row) {
@@ -66,7 +67,7 @@ void Burgers::serializeMatrix(double *m, ofstream* dataFile) {
     }
 }
 
-void Burgers::integrateVelocityField() {
+void Burgers::integrateVelocityField(int argc, char* argv[]) {
     const double Nt = m->getNt();
     const double dx = m->getDx();
     const double dy = m->getDy();
@@ -87,6 +88,25 @@ void Burgers::integrateVelocityField() {
     
 	typedef std::chrono::high_resolution_clock hrc;
     hrc::time_point loop_start = hrc::now();
+    
+    int n    = 2;
+    int rank = 0;
+    int size = 0;
+    int err = MPI_Init(&argc, &argv);
+    if (err != MPI_SUCCESS) {
+        cerr << "An error occurred initialising MPI" << endl;
+        return;
+    }
+    
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    
+    if (rank==0) {
+        if (size < n) {
+            printf("You  have requested for parallelism on %ix processors but only %i is/are available.\n", n, size);
+        }
+        printf("Running integration on %i process(es).\n", (n <= size ? n : size));
+    }
     
     auto* un = new double[Nx*Ny];
     auto* vn = new double[Nx*Ny];

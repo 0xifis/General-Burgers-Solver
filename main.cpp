@@ -13,16 +13,16 @@ int main(int argc, char* argv[]) {
 
         // Call code to initialise the problem here
         b.initializeVelocityField();
-//
+
         typedef std::chrono::high_resolution_clock hrc;
         typedef std::chrono::milliseconds ms;
         
         hrc::time_point start = hrc::now();
-
-        // Call code to perform time integration here
-        b.integrateVelocityField();
+        
+        b.integrateVelocityField(argc, argv);
 
         hrc::time_point end = hrc::now();
+        int MPI_Finalize();
     
         cout << "Integration took "
                   << chrono::duration_cast<ms>(end - start).count()

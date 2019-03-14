@@ -8,7 +8,7 @@ class Burgers {
         explicit Burgers(Model *m_);
         void initializeVelocityField();
         void printVelocityField();
-        void integrateVelocityField();
+        void integrateVelocityField(int argc, char *argv[]);
         double fieldEnergy();
 
     private:
