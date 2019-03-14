@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 project(Coursework)
 
+if(APPLE)
+    SET(CMAKE_C_COMPILER /usr/local/bin/mpicc)
+    SET(CMAKE_CXX_COMPILER /usr/local/bin/mpicxx)
+else()
+    SET(CMAKE_C_COMPILER /usr/bin/mpicc)
+    SET(CMAKE_CXX_COMPILER /usr/bin/mpicxx)
+endif()
+
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 #SET(GCC_COVERAGE_LINK_FLAGS    "-llapack -lblas")
