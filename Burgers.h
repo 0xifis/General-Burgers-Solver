@@ -25,6 +25,7 @@ class Burgers {
         unsigned int bbound = 0;
         void adjustBounds(unsigned int row, unsigned int col);
         void rollbackBounds();
+        bool verbose = false;
 };
 
 #endif

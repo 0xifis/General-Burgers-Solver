@@ -19,7 +19,7 @@ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(burgers main.cpp Model.cpp Burgers.cpp MyMPI.cpp MyMPI.h)
+add_executable(burgers main.cpp Model.cpp Burgers.cpp MyMPI.cpp MyMPI.h helper.h)
 
 add_custom_target(burg
         COMMAND burgers -p 1 0.5 1 0.02 -s 2001 2001 4000
@@ -28,13 +28,39 @@ add_custom_target(burg
         SOURCES ${burgers_SOURCES}
         )
 
+add_custom_target(advx
+        COMMAND burgers --physics 1 0 0 0 --steps 2001 2001 4000 -v
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
+        SOURCES ${burgers_SOURCES}
+        )
+
+
 add_custom_target(burgp
-        COMMAND mpirun burgers -np 2 --physics 1 0.5 1 0.02 --steps 2001 2001 4000
+        COMMAND mpirun burgers -np 2 --physics 1 0.5 1 0.02 --steps 2001 2001 4000 -x 2 1 -v
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
+        SOURCES ${burgers_SOURCES}
+        )
+
+add_custom_target(advxp
+        COMMAND mpirun burgers -np 2 --physics 1 0 0 0 --steps 2001 2001 4000 -x 2 1 -v
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
+        SOURCES ${burgers_SOURCES}
+        )
+
+add_custom_target(q
+        COMMAND mpirun burgers -np 2 --physics 1 0.5 1 0.02 --steps 1001 501 400 -x 2 1 -v
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
         SOURCES ${burgers_SOURCES}
         )
 
 add_dependencies(burgp burgers)
+add_dependencies(advxp burgers)
+add_dependencies(burg burgers)
+add_dependencies(advx burgers)
+add_dependencies(q burgers)
 
 

@@ -11,6 +11,7 @@ using namespace std;
 Burgers::Burgers(Model *m_) : m(m_), Nx(m->getNx()), Ny(m->getNy()) {
     u = new double[Nx*Ny];
     v = new double[Nx*Ny];
+    verbose = m->isVerbose();
 }
 
 double Burgers::x(int col) {
@@ -117,14 +118,13 @@ void Burgers::integrateVelocityField() {
         
 //        rollbackBounds();
 
-		if (t%10 == 0)
+		if (verbose && t%100 == 0)
 			cout << "Time Step: " << t << " of " << Nt
 				 << "\tRunning time: " << chrono::duration_cast<chrono::milliseconds>(hrc::now() - loop_start).count()
 				 << "ms"
 				 << "\tl: " << lbound << " r: " << rbound << " t: " << tbound << " b: " << bbound
 				 << endl;
     }
-    cout << "\n\nDone\n\n";
     delete[] vn;
     delete[] un;
 }

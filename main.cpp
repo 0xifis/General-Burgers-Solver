@@ -3,6 +3,7 @@
 #include "Burgers.h"
 #include "mpi.h"
 #include "MyMPI.h"
+#include "helper.h"
 
 using namespace std;
 
@@ -31,9 +32,13 @@ int main(int argc, char* argv[]) {
 
         hrc::time_point end = hrc::now();
     
-        cout << "Integration took "
-                  << chrono::duration_cast<ms>(end - start).count()
-                  << "us.\n";
+        MPI_Barrier(MPI_COMM_WORLD);
+    
+        cout << "Processor #" << myMPI.rank()
+             << ": Integration took "
+             << chrono::duration_cast<ms>(end - start).count()/1000.
+             << "s.\n";
+        
 
         // Calculate final energy and write output
         if(myMPI.rank()==0) {
