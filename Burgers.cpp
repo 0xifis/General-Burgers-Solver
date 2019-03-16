@@ -154,13 +154,13 @@ void Burgers::splitDomain() {
     ranky = world_rank - rankx * Py;
     auto dvx = div((int)Nx-1,Px);
     for(int i=0; i < rankx; ++i) {
-        worldx+= dvx.quot + ( i < dvx.rem? 1 : 0) + 1;
+        worldx+= dvx.quot + ( i < dvx.rem? 1 : 0);
     }
     locNx = dvx.quot + ( rankx < dvx.rem? 1 : 0) + 1;
     
     auto dvy = div((int)Ny-1,Py);
     for(int i=0; i < ranky; ++i) {
-        worldy+= dvy.quot + (i < dvy.rem ? 1 : 0) + 1;
+        worldy+= dvy.quot + (i < dvy.rem ? 1 : 0);
     }
     locNy = dvy.quot + ( ranky < dvy.rem? 1 : 0) + 1;
     
