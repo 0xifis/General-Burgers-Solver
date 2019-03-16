@@ -20,3 +20,21 @@ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(burgers main.cpp Model.cpp Burgers.cpp MyMPI.cpp MyMPI.h)
+
+add_custom_target(burg
+        COMMAND burgers -p 1 0.5 1 0.02 -s 2001 2001 4000
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Running burgers in ${CMAKE_CURRENT_SOURCE_DIR}"
+        SOURCES ${burgers_SOURCES}
+        )
+
+add_custom_target(burgp
+        COMMAND mpirun burgers -np 2 --physics 1 0.5 1 0.02 --steps 2001 2001 4000
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
+        SOURCES ${burgers_SOURCES}
+        )
+
+add_dependencies(burgp burgers)
+
+
