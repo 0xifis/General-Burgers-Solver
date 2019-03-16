@@ -162,7 +162,7 @@ void Burgers::splitDomain() {
     for(int i=0; i < ranky; ++i) {
         worldy+= dvy.quot + (i < dvy.rem ? 1 : 0) + 1;
     }
-    locNy = dvx.quot + ( ranky < dvx.rem? 1 : 0) + 1;
+    locNy = dvy.quot + ( ranky < dvy.rem? 1 : 0) + 1;
     
     worldRef = worldx*Ny + worldy;
     cout    << "P" << world_rank
