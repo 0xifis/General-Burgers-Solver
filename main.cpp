@@ -8,17 +8,19 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    MyMPI myMPI(argc, argv);
-    if(!myMPI.isValid()) return 1;
-    MPI_Comm myComm;
-    myMPI.createSubComm(&myComm);
-    
     Model m(argc, argv);
+    MyMPI myMPI(argc, argv, m.getPx(), m.getPy());
+    
     if (m.isVerbose() && myMPI.rank()==0) m.printParameters();
+    
+    if(!myMPI.isValid()) return 1;
+//    MPI_Comm myComm;
+//    myMPI.createSubComm(&myComm);
+    
     if (m.isValid()) {
         MPI_Barrier(MPI_COMM_WORLD);
         printf("Processor #%i is now running the model with given parameters.\n", myMPI.rank());
-        Burgers b(&m);
+        Burgers b(&m, &myMPI);
 
         // Call code to initialise the problem here
         b.initializeVelocityField();

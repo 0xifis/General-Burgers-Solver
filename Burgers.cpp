@@ -8,10 +8,9 @@
 
 using namespace std;
 
-Burgers::Burgers(Model *m_) : m(m_), Nx(m->getNx()), Ny(m->getNy()) {
+Burgers::Burgers(Model *m_, MyMPI *myMPI_) : m(m_), myMPI(myMPI_) {
     u = new double[Nx*Ny];
     v = new double[Nx*Ny];
-    verbose = m->isVerbose();
 }
 
 double Burgers::x(int col) {
@@ -44,31 +43,24 @@ void Burgers::initializeVelocityField() {
 }
 
 void Burgers::printVelocityField() {
-    const char ufilename[] = "velocity_u.csv";
-    cout << "Writing velocity field data to file - " << ufilename << endl;
-    ofstream udataFile (ufilename, fstream::trunc);
-    serializeMatrix(u, &udataFile);
-    udataFile.close();
-    
-    const char vfilename[] = "velocity_v.csv";
-    cout << "Writing velocity field data v to file - " << vfilename << endl;
-    ofstream vdataFile (vfilename, fstream::trunc);
-    serializeMatrix(u, &vdataFile);
-    vdataFile.close();
-    
-    cout << "\nDone :)" << endl;
+    serializeMatrix(u, "velocity_u.csv");
+    serializeMatrix(v, "velocity_v.csv");
 }
 
-void Burgers::serializeMatrix(double *m, ofstream* dataFile) {
-    for( unsigned int row=0; row<Ny; ++row) {
-        for( unsigned int col=0; col<Nx; ++col) {
-            *dataFile << (col==0 ? ' ' : ',') << m[col*Ny+row];
+void Burgers::serializeMatrix(double *m, const char filename[]) {
+    ofstream dataFile (filename, fstream::trunc);
+    cout << "Writing velocity field data to file - " << filename << endl;
+    for(unsigned int row=0; row<Ny; ++row) {
+        for(unsigned int col=0; col<Nx; ++col) {
+            dataFile << (col==0 ? ' ' : ',') << m[col*Ny+row];
         }
-        *dataFile << '\n';
+        dataFile << '\n';
     }
+    dataFile.close();
 }
 
 void Burgers::integrateVelocityField() {
+    splitDomain();
     const double Nt = m->getNt();
     const double dx = m->getDx();
     const double dy = m->getDy();
@@ -155,4 +147,23 @@ void Burgers::rollbackBounds() {
     if(rbound < Nx-2) rbound++;
     if(tbound > 1) tbound--;
     if(bbound < Ny-2) bbound++;
+}
+
+void Burgers::splitDomain() {
+    int Px = m->getPx();
+    int Py = m->getPy();
+    
+//    auto *allNx = new int[Px];
+//    auto *allNy = new int[Py];
+    
+    auto dvx = div(Nx-1,Px);
+    locNx = dvx.quot;
+    locNx += ( world_rank < dvx.rem? 1 : 0) + 1;
+    
+    auto dvy = div(Ny-1,Py);
+    locNy = dvy.quot;
+    locNy += (world_rank < dvy.rem ? 1 : 0) + 1;
+    
+    cout    << "locNx: " << locNx
+            << " locNy: " << locNy << endl;
 }

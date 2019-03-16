@@ -9,15 +9,13 @@
 
 class MyMPI {
     public:  
-        MyMPI(int argc, char* argv[]);
+        MyMPI(int argc, char* argv[], int Px, int Py);
         void createSubComm(MPI_Comm* myComm);
         bool isValid() { return valid; };
         int size() { return world_size; };
         int rank() { return world_rank; };
     private:
-        int Np = 1;
-        int Px = 1;
-        int Py = 1;
+        int Np;
         int world_size;
         int world_rank;
         bool valid = false;

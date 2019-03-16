@@ -57,6 +57,17 @@ bool Model::parseArguments(int argc, char* argv[]) {
                 cerr << "-s/--steps option requires three positive arguments of type int (Nx, Ny, Nt)." << endl;
                 return false;
             }
+        } else if (arg == "-x" || arg == "processes") {
+            try {
+                i++;
+                Px = stoi(string(argv[i]));
+                i++;
+                Py = stoi(string(argv[i]));
+            }
+            catch (const exception &e) {
+                cerr << "Error: " << e.what() << endl;
+                cerr << "-x option requires two arguments of type int." << endl;
+            }
         }
     }
     return true;

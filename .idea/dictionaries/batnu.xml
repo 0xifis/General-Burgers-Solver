@@ -1,8 +1,15 @@
 <component name="ProjectDictionaryState">
   <dictionary name="batnu">
     <words>
+      <w>bbound</w>
+      <w>rbound</w>
+      <w>tbound</w>
       <w>tempu</w>
       <w>tempv</w>
+      <w>udata</w>
+      <w>ufilename</w>
+      <w>vdata</w>
+      <w>vfilename</w>
     </words>
   </dictionary>
 </component>

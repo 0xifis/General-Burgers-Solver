@@ -25,7 +25,7 @@ class Model {
         double          getY0()     const { return y0; }
         double          getLx()     const { return Lx; }
         double          getLy()     const { return Ly; }
-        double          getT()      const { return T; }
+        double          getT()      const { return T;  }
         unsigned int    getNx()     const { return Nx; }
         unsigned int    getNy()     const { return Ny; }
         unsigned int    getNt()     const { return Nt; }
@@ -34,8 +34,10 @@ class Model {
         double          getDt()     const { return dt; }
         double          getAx()     const { return ax; }
         double          getAy()     const { return ay; }
-        double          getB()      const { return b; }
-        double          getC()      const { return c; }
+        double          getB()      const { return b;  }
+        double          getC()      const { return c;  }
+        unsigned int    getPx()     const { return Px; }
+        unsigned int    getPy()     const { return Py; }
 
 	private:
         bool parseArguments(int argc, char* argv[]);
@@ -69,6 +71,11 @@ class Model {
 	    double          ay   =   0;
 	    double          b    =   0;
 	    double          c    =   0;
+	    
+	    // Parallelism
+        unsigned int    Px   =   1;
+        unsigned int    Py   =   1;
+    
 };
 
 #endif
