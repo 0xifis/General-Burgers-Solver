@@ -17,15 +17,10 @@ class Burgers {
         void adjustBounds(unsigned int row, unsigned int col);
         void splitDomain();
         Model* m;
-        MyMPI* myMPI;
-        unsigned int world_rank = myMPI->rank();
         double* u;
         double* v;
         unsigned int Nx = m->getNx();
         unsigned int Ny = m->getNy();
-        unsigned int Px = m->getPx();
-        unsigned int Py = m->getPy();
-        unsigned int locNx, locNy;
         double x(int col), y(int row);
         double r_thresh = 1;
         unsigned int lbound = Ny;
@@ -34,6 +29,17 @@ class Burgers {
         unsigned int bbound = 0;
         void rollbackBounds();
         bool verbose = m->isVerbose();
+    
+        MyMPI* myMPI;
+        unsigned int world_rank = myMPI->rank();
+        unsigned int rankx;
+        unsigned int ranky;
+        unsigned int Px = m->getPx();
+        unsigned int Py = m->getPy();
+        unsigned int locNx, locNy;
+        unsigned int worldx = 0;
+        unsigned int worldy = 0;
+        unsigned int worldRef = 0;
 };
 
 #endif

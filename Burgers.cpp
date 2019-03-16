@@ -150,20 +150,27 @@ void Burgers::rollbackBounds() {
 }
 
 void Burgers::splitDomain() {
-    int Px = m->getPx();
-    int Py = m->getPy();
+    rankx = world_rank / Py;
+    ranky = world_rank - rankx * Py;
+    auto dvx = div((int)Nx-1,Px);
+    for(int i=0; i < rankx; ++i) {
+        worldx+= dvx.quot + ( i < dvx.rem? 1 : 0) + 1;
+    }
+    locNx = dvx.quot + ( rankx < dvx.rem? 1 : 0) + 1;
     
-//    auto *allNx = new int[Px];
-//    auto *allNy = new int[Py];
+    auto dvy = div((int)Ny-1,Py);
+    for(int i=0; i < ranky; ++i) {
+        worldy+= dvy.quot + (i < dvy.rem ? 1 : 0) + 1;
+    }
+    locNy = dvx.quot + ( ranky < dvx.rem? 1 : 0) + 1;
     
-    auto dvx = div(Nx-1,Px);
-    locNx = dvx.quot;
-    locNx += ( world_rank < dvx.rem? 1 : 0) + 1;
-    
-    auto dvy = div(Ny-1,Py);
-    locNy = dvy.quot;
-    locNy += (world_rank < dvy.rem ? 1 : 0) + 1;
-    
-    cout    << "locNx: " << locNx
+    worldRef = worldx*Ny + worldy;
+    cout    << "P" << world_rank
+            << " worldref: " << worldRef
+            << " worldx: " << worldx
+            << " worldy: " << worldy
+            << " rankx: " << rankx
+            << " ranky: " << ranky
+            << " locNx: " << locNx
             << " locNy: " << locNy << endl;
 }
