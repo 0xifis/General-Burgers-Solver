@@ -27,8 +27,8 @@ double Burgers::y(int row) {
 
 void Burgers::initializeVelocityField() {
     double r, rb;
-    for(unsigned int col=0; col < Nx; ++col ) {
-        for(unsigned int row=0; row < Ny; ++row) {
+    for(unsigned int col=worldx; col < worldx+locNx; ++col ) {
+        for(unsigned int row=worldy; row < worldy+Ny; ++row) {
             r = sqrt(pow(x(col),2)+pow(y(row),2));
             if (r <= r_thresh) {
                 rb = 2*pow(1-r,4)*(4*r+1);
