@@ -10,7 +10,8 @@ class Burgers {
         void initializeVelocityField();
         void printVelocityField();
         void integrateVelocityField();
-        double fieldEnergy();
+        double getFieldEnergy();
+        void calculateFieldEnergy();
 
     private:
         void serializeMatrix(double* m, const char filename[]);
@@ -29,6 +30,9 @@ class Burgers {
         unsigned int bbound = 0;
         void rollbackBounds();
         bool verbose = m->isVerbose();
+    
+        double worldEnergy = 0.0;
+        double energy = 0.0;
     
         MyMPI* myMPI;
         unsigned int world_rank = myMPI->rank();

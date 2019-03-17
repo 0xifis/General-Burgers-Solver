@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
         
         hrc::time_point start = hrc::now();
         
-        b.integrateVelocityField();
+//        b.integrateVelocityField();
 
         hrc::time_point end = hrc::now();
     
@@ -43,8 +43,9 @@ int main(int argc, char* argv[]) {
         
 
         // Calculate final energy and write output
+        b.calculateFieldEnergy();
         if(myMPI.rank()==0) {
-            cout << "Energy: " << b.fieldEnergy() << endl;
+            cout << "Energy: " << b.getFieldEnergy() << endl;
             b.printVelocityField();
         }
 

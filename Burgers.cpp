@@ -11,6 +11,7 @@ using namespace std;
 Burgers::Burgers(Model *m_, MyMPI *myMPI_) : m(m_), myMPI(myMPI_) {
     u = new double[Nx*Ny];
     v = new double[Nx*Ny];
+    splitDomain();
 }
 
 double Burgers::x(int col) {
@@ -28,7 +29,7 @@ double Burgers::y(int row) {
 void Burgers::initializeVelocityField() {
     double r, rb;
     for(unsigned int col=worldx; col < worldx+locNx; ++col ) {
-        for(unsigned int row=worldy; row < worldy+Ny; ++row) {
+        for(unsigned int row=worldy; row < worldy+locNy; ++row) {
             r = sqrt(pow(x(col),2)+pow(y(row),2));
             if (r <= r_thresh) {
                 rb = 2*pow(1-r,4)*(4*r+1);
@@ -60,7 +61,6 @@ void Burgers::serializeMatrix(double *m, const char filename[]) {
 }
 
 void Burgers::integrateVelocityField() {
-    splitDomain();
     const double Nt = m->getNt();
     const double dx = m->getDx();
     const double dy = m->getDy();
@@ -121,16 +121,6 @@ void Burgers::integrateVelocityField() {
     delete[] un;
 }
 
-double Burgers::fieldEnergy() {
-    double energy = 0.0;
-    const double dx = m->getDx();
-    const double dy = m->getDy();
-    for (unsigned int i = 0; i < Nx * Ny; ++i) {
-        energy += 0.5 * (u[i] * u[i] + v[i] * v[i]) * dx * dy;
-    }
-    return energy;
-}
-
 void Burgers::adjustBounds(unsigned int row, unsigned int col) {
     if(col <  Nx-2 && col > 1) {
         if (lbound >= col) lbound = col - 1;
@@ -173,4 +163,22 @@ void Burgers::splitDomain() {
             << " ranky: " << ranky
             << " locNx: " << locNx
             << " locNy: " << locNy << endl;
+}
+
+double Burgers::getFieldEnergy() {
+    return worldEnergy;
+}
+
+void Burgers::calculateFieldEnergy() {
+    const double dx = m->getDx();
+    const double dy = m->getDy();
+    for(unsigned int col=worldx+1; col < worldx+locNx-1; ++col) {
+        for (unsigned int row = worldy+1; row < worldy+locNy-1; ++row) {
+            energy += (u[col*Ny+row] * u[col*Ny+row] + v[col*Ny+row] * v[col*Ny+row]);
+        }
+    }
+    
+    cout << world_rank << "Energy: " << energy << endl;
+    MPI_Reduce(&energy, &worldEnergy, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    worldEnergy *= dx*dy*0.5;
 }
