@@ -48,7 +48,7 @@ void Burgers::printVelocityField() {
     serializeMatrix(v, "velocity_v.csv");
 }
 
-void Burgers::serializeMatrix(double *m, const char filename[]) {
+void Burgers::serializeMatrix(double *m, string filename) {
     ofstream dataFile (filename, fstream::trunc);
     cout << "Writing velocity field data to file - " << filename << endl;
     for(unsigned int row=0; row<Ny; ++row) {
@@ -142,17 +142,17 @@ void Burgers::rollbackBounds() {
 void Burgers::splitDomain() {
     rankx = world_rank / Py;
     ranky = world_rank - rankx * Py;
-    auto dvx = div((int)Nx-1,Px);
+    auto dvx = div((int)Nx-2,Px);
     for(int i=0; i < rankx; ++i) {
         worldx+= dvx.quot + ( i < dvx.rem? 1 : 0);
     }
-    locNx = dvx.quot + ( rankx < dvx.rem? 1 : 0) + 1;
+    locNx = dvx.quot + ( rankx < dvx.rem? 1 : 0) + 2;
     
-    auto dvy = div((int)Ny-1,Py);
+    auto dvy = div((int)Ny-2,Py);
     for(int i=0; i < ranky; ++i) {
         worldy+= dvy.quot + (i < dvy.rem ? 1 : 0);
     }
-    locNy = dvy.quot + ( ranky < dvy.rem? 1 : 0) + 1;
+    locNy = dvy.quot + ( ranky < dvy.rem? 1 : 0) + 2;
     
     worldRef = worldx*Ny + worldy;
     cout    << "P" << world_rank

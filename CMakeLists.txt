@@ -51,7 +51,7 @@ add_custom_target(advxp
         )
 
 add_custom_target(q
-        COMMAND mpirun burgers -np 2 --physics 1 0.5 1 0.02 --steps 1001 501 400 -x 2 1 -v
+        COMMAND mpirun burgers -np 2 --physics 1 0.5 1 0.02 --steps 11 11 400 -x 2 1 -v
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
         SOURCES ${burgers_SOURCES}

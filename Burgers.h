@@ -14,7 +14,7 @@ class Burgers {
         void calculateFieldEnergy();
 
     private:
-        void serializeMatrix(double* m, const char filename[]);
+        void serializeMatrix(double* m, string filename);
         void adjustBounds(unsigned int row, unsigned int col);
         void splitDomain();
         Model* m;
