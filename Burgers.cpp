@@ -86,8 +86,8 @@ void Burgers::integrateVelocityField() {
     auto* vn = new double[Nx*Ny];
     for (int t = 1; t <= Nt; ++t) {
         #pragma omp parallel for private(i_j, ix_j, xi_j, i_jx, i_xj, tempu, tempv) ordered
-        for(unsigned int col = lbound; col <= rbound; ++col) {
-            for(unsigned int row = tbound; row <= bbound; ++row) {
+        for(unsigned int col = worldx+1; col <= worldx+locNx-2; ++col) {
+            for(unsigned int row = worldy+1; row <= worldy+locNy-2; ++row) {
                 i_j = col*Ny+row;
                 i_jx= i_j + 1;
                 i_xj= i_j - 1;
@@ -102,13 +102,15 @@ void Burgers::integrateVelocityField() {
     
                 un[i_j] = dt * tempu;
                 vn[i_j] = dt * tempv;
-                if (fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
+//                if (fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
             }
         }
         swap(un, u);
         swap(vn, v);
-        
+        exchangePadding();
 //        rollbackBounds();
+
+
 
 		if (verbose && t%100 == 0)
 			cout << "Time Step: " << t << " of " << Nt
@@ -172,13 +174,56 @@ double Burgers::getFieldEnergy() {
 void Burgers::calculateFieldEnergy() {
     const double dx = m->getDx();
     const double dy = m->getDy();
-    for(unsigned int col=worldx+1; col < worldx+locNx-1; ++col) {
-        for (unsigned int row = worldy+1; row < worldy+locNy-1; ++row) {
-            energy += (u[col*Ny+row] * u[col*Ny+row] + v[col*Ny+row] * v[col*Ny+row]);
+    #pragma omp parallel for reduction(+:energy)
+    for(unsigned int col=worldx+1; col <= worldx+locNx-2; ++col) {
+        for (unsigned int row = worldy+1; row <= worldy+locNy-2; ++row) {
+            energy += u[col*Ny+row] * u[col*Ny+row] + v[col*Ny+row] * v[col*Ny+row];
         }
     }
-    
-    cout << world_rank << "Energy: " << energy << endl;
     MPI_Reduce(&energy, &worldEnergy, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     worldEnergy *= dx*dy*0.5;
+}
+
+void Burgers::exchangePadding() {
+    sendAndReceiveCols();
+}
+
+void Burgers::sendAndReceiveCols() {
+//    MPI_Send( void* data, int count, MPI_Datatype datatype, int destination, int tag, MPI_Comm communicator)
+    MPI_Datatype inner_col;
+    MPI_Type_vector(1,locNy-2,locNy-2,MPI_DOUBLE,&inner_col);
+    MPI_Type_commit(&inner_col);
+    
+    int right_inner_col = worldRef+(locNx-2)*Ny+1;
+    int right_padding_col = worldRef+(locNx-1)*Ny+1;
+    
+    int left_inner_col = worldRef+Ny+1;
+    int left_padding_col = worldRef+1;
+    
+    if(rankx > 0 && rankx < Px-1) { // Center domains; send left & right
+
+    } else if (rankx == 0) { //Left domain; send & recv right col,
+//        cout << "P" << world_rank << ": sending right col to " << worldRef+(locNx-2)*Ny+1 << endl;
+        MPI_Send(&u[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 99, MPI_COMM_WORLD);
+//        cout << "P" << world_rank << ": waiting from " << worldRef+(locNx-1)*Ny+1 << endl;
+        MPI_Recv(&u[right_padding_col], 1, inner_col, getRank(rankx+1,ranky), 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        //        cout << "P" << world_rank << ": sending right col to " << worldRef+(locNx-2)*Ny+1 << endl;
+        MPI_Send(&v[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 99, MPI_COMM_WORLD);
+//        cout << "P" << world_rank << ": waiting from " << worldRef+(locNx-1)*Ny+1 << endl;
+        MPI_Recv(&v[right_padding_col], 1, inner_col, getRank(rankx+1,ranky), 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    } else { //Right domain; send & recv left col,
+
+//        cout << "P" << world_rank << ": waiting from " << worldRef+1 << endl;
+        MPI_Recv(&u[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//        cout << "P" << world_rank << ": sending left col to " << worldRef+Ny+1 << endl;
+        MPI_Send(&u[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 99, MPI_COMM_WORLD);
+        //        cout << "P" << world_rank << ": waiting from " << worldRef+1 << endl;
+        MPI_Recv(&v[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//        cout << "P" << world_rank << ": sending left col to " << worldRef+Ny+1 << endl;
+        MPI_Send(&v[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 99, MPI_COMM_WORLD);
+    }
+}
+
+int Burgers::getRank(int rankx, int ranky) {
+    return rankx*Py+ranky;
 }

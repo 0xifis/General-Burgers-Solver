@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
         
         hrc::time_point start = hrc::now();
         
-//        b.integrateVelocityField();
+        b.integrateVelocityField();
 
         hrc::time_point end = hrc::now();
     

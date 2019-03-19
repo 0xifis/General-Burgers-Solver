@@ -17,6 +17,9 @@ class Burgers {
         void serializeMatrix(double* m, string filename);
         void adjustBounds(unsigned int row, unsigned int col);
         void splitDomain();
+        void exchangePadding();
+        void sendAndReceiveCols();
+        int getRank(int rankx, int ranky);
         Model* m;
         double* u;
         double* v;
