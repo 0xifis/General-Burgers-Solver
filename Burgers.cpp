@@ -233,6 +233,7 @@ void Burgers::sendAndReceiveCols() {
         MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
         delete[] reqs;
     }
+//    TODO: pull up the waitall
 }
 
 void Burgers::sendAndReceiveRows() {
