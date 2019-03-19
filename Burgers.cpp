@@ -185,7 +185,7 @@ void Burgers::calculateFieldEnergy() {
 }
 
 void Burgers::exchangePadding() {
-    sendAndReceiveCols();
+    if (Px > 1) sendAndReceiveCols();
 }
 
 void Burgers::sendAndReceiveCols() {
