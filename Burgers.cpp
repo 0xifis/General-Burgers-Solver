@@ -42,6 +42,8 @@ void Burgers::initializeVelocityField() {
             v[col*Ny+row] = rb;
         }
     }
+    cout << "\tl: " << lbound << " r: " << rbound << " t: " << tbound << " b: " << bbound
+               << endl;
 }
 
 void Burgers::printVelocityField() {
@@ -92,7 +94,6 @@ void Burgers::integrateVelocityField() {
         ltbound = max(tbound, worldy+1);
         lbbound = min(bbound, worldy+locNy-2);
         #pragma omp parallel for private(i_j, ix_j, xi_j, i_jx, i_xj, tempu, tempv) ordered
-        
         for(unsigned int col = llbound; col <= lrbound; ++col) {
             for(unsigned int row = ltbound; row <= lbbound; ++row) {
                 i_j = col*Ny+row;
@@ -109,18 +110,18 @@ void Burgers::integrateVelocityField() {
     
                 un[i_j] = dt * tempu;
                 vn[i_j] = dt * tempv;
-                if (fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
+                if (fabs(un[i_j]) > 1e-8 || fabs(vn[i_j]) > 1e-8) adjustBounds(row, col);
             }
         }
         swap(un, u);
         swap(vn, v);
         exchangePadding();
-        exchangeBounds();
 //        rollbackBounds();
+        exchangeBounds();
 
 
 
-		if (verbose && t%100 == 0)
+		if (verbose && t%500 == 0)
 			cout << "Time Step: " << t << " of " << Nt
 				 << "\tRunning time: " << chrono::duration_cast<chrono::milliseconds>(hrc::now() - loop_start).count()
 				 << "ms"
@@ -165,14 +166,14 @@ void Burgers::splitDomain() {
     locNy = dvy.quot + ( ranky < dvy.rem? 1 : 0) + 2;
     
     worldRef = worldx*Ny + worldy;
-    cout    << "P" << world_rank
-            << " worldref: " << worldRef
-            << " worldx: " << worldx
-            << " worldy: " << worldy
-            << " rankx: " << rankx
-            << " ranky: " << ranky
-            << " locNx: " << locNx
-            << " locNy: " << locNy << endl;
+    if(m->isVerbose()) cout << "P" << world_rank
+                            << " worldref: " << worldRef
+                            << " worldx: " << worldx
+                            << " worldy: " << worldy
+                            << " rankx: " << rankx
+                            << " ranky: " << ranky
+                            << " locNx: " << locNx
+                            << " locNy: " << locNy << endl;
 }
 
 double Burgers::getFieldEnergy() {
@@ -297,8 +298,8 @@ int Burgers::getRank(int rankx, int ranky) {
 }
 
 void Burgers::exchangeBounds() {
-    MPI_Allreduce(&lbound, &lbound, 1, MPI_DOUBLE, MPI_MIN , MPI_COMM_WORLD);
-    MPI_Allreduce(&tbound, &tbound, 1, MPI_DOUBLE, MPI_MIN , MPI_COMM_WORLD);
-    MPI_Allreduce(&rbound, &rbound, 1, MPI_DOUBLE, MPI_MAX , MPI_COMM_WORLD);
-    MPI_Allreduce(&bbound, &bbound, 1, MPI_DOUBLE, MPI_MAX , MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &lbound, 1, MPI_UNSIGNED, MPI_MIN , MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &tbound, 1, MPI_UNSIGNED, MPI_MIN , MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &rbound, 1, MPI_UNSIGNED, MPI_MAX , MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, &bbound, 1, MPI_UNSIGNED, MPI_MAX , MPI_COMM_WORLD);
 }

@@ -19,7 +19,6 @@ int main(int argc, char* argv[]) {
     
     if (m.isValid()) {
         MPI_Barrier(MPI_COMM_WORLD);
-        printf("Processor #%i is now running the model with given parameters.\n", myMPI.rank());
         Burgers b(&m, &myMPI);
 
         // Call code to initialise the problem here
