@@ -201,26 +201,33 @@ void Burgers::sendAndReceiveCols() {
     int left_padding_col = worldRef+1;
     
     if(rankx > 0 && rankx < Px-1) { // Center domains; send left & right
-
+        auto* reqs = new MPI_Request[4];
+        MPI_Isend(&u[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 0, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(&v[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 1, MPI_COMM_WORLD, &reqs[1]);
+        MPI_Recv(&u[right_padding_col], 1, inner_col, getRank(rankx+1,ranky), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&v[right_padding_col], 1, inner_col, getRank(rankx+1,ranky), 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    
+        MPI_Isend(&u[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 0, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(&v[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 1, MPI_COMM_WORLD, &reqs[1]);
+        MPI_Recv(&u[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&v[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        delete[] reqs;
     } else if (rankx == 0) { //Left domain; send & recv right col,
 //        cout << "P" << world_rank << ": sending right col to " << worldRef+(locNx-2)*Ny+1 << endl;
-        MPI_Send(&u[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 99, MPI_COMM_WORLD);
-//        cout << "P" << world_rank << ": waiting from " << worldRef+(locNx-1)*Ny+1 << endl;
-        MPI_Recv(&u[right_padding_col], 1, inner_col, getRank(rankx+1,ranky), 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        //        cout << "P" << world_rank << ": sending right col to " << worldRef+(locNx-2)*Ny+1 << endl;
-        MPI_Send(&v[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 99, MPI_COMM_WORLD);
-//        cout << "P" << world_rank << ": waiting from " << worldRef+(locNx-1)*Ny+1 << endl;
-        MPI_Recv(&v[right_padding_col], 1, inner_col, getRank(rankx+1,ranky), 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//        cout << "P" << world_rank << ": sending left col to " << worldRef+Ny+1 << endl;
+        auto* reqs = new MPI_Request[2];
+        MPI_Isend(&u[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 0, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(&v[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 1, MPI_COMM_WORLD, &reqs[1]);
+        MPI_Recv(&u[right_padding_col], 1, inner_col, getRank(rankx+1,ranky), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&v[right_padding_col], 1, inner_col, getRank(rankx+1,ranky), 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        delete[] reqs;
     } else { //Right domain; send & recv left col,
-
-//        cout << "P" << world_rank << ": waiting from " << worldRef+1 << endl;
-        MPI_Recv(&u[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-//        cout << "P" << world_rank << ": sending left col to " << worldRef+Ny+1 << endl;
-        MPI_Send(&u[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 99, MPI_COMM_WORLD);
-        //        cout << "P" << world_rank << ": waiting from " << worldRef+1 << endl;
-        MPI_Recv(&v[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-//        cout << "P" << world_rank << ": sending left col to " << worldRef+Ny+1 << endl;
-        MPI_Send(&v[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 99, MPI_COMM_WORLD);
+        auto* reqs = new MPI_Request[2];
+        MPI_Isend(&u[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 0, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(&v[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 1, MPI_COMM_WORLD, &reqs[1]);
+        MPI_Recv(&u[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&v[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        delete[] reqs;
     }
 }
 
