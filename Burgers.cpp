@@ -95,6 +95,7 @@ void Burgers::integrateVelocityField() {
         lbbound = min(bbound, worldy+locNy-2);
         #pragma omp parallel for private(i_j, ix_j, xi_j, i_jx, i_xj, tempu, tempv) ordered
         for(unsigned int col = llbound; col <= lrbound; ++col) {
+            #pragma omp simd
             for(unsigned int row = ltbound; row <= lbbound; ++row) {
                 i_j = col*Ny+row;
                 i_jx= i_j + 1;
