@@ -5,6 +5,7 @@
 #include <chrono>
 #include "mpi.h"
 #include <stdio.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -77,6 +78,7 @@ void Burgers::integrateVelocityField() {
     const double p_i_jx = c / dy / dy;
     
     int i_j, ix_j, xi_j, i_jx, i_xj;
+    unsigned int llbound, lrbound, ltbound, lbbound;
     double tempu, tempv;
     
 	typedef std::chrono::high_resolution_clock hrc;
@@ -85,9 +87,14 @@ void Burgers::integrateVelocityField() {
     auto* un = new double[Nx*Ny];
     auto* vn = new double[Nx*Ny];
     for (int t = 1; t <= Nt; ++t) {
+        llbound = max(lbound, worldx+1);
+        lrbound = min(rbound, worldx+locNx-2);
+        ltbound = max(tbound, worldy+1);
+        lbbound = min(bbound, worldy+locNy-2);
         #pragma omp parallel for private(i_j, ix_j, xi_j, i_jx, i_xj, tempu, tempv) ordered
-        for(unsigned int col = worldx+1; col <= worldx+locNx-2; ++col) {
-            for(unsigned int row = worldy+1; row <= worldy+locNy-2; ++row) {
+        
+        for(unsigned int col = llbound; col <= lrbound; ++col) {
+            for(unsigned int row = ltbound; row <= lbbound; ++row) {
                 i_j = col*Ny+row;
                 i_jx= i_j + 1;
                 i_xj= i_j - 1;
@@ -102,12 +109,13 @@ void Burgers::integrateVelocityField() {
     
                 un[i_j] = dt * tempu;
                 vn[i_j] = dt * tempv;
-//                if (fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
+                if (fabs(u[i_j]) > 1e-8 || fabs(v[i_j]) > 1e-8) adjustBounds(row, col);
             }
         }
         swap(un, u);
         swap(vn, v);
         exchangePadding();
+        exchangeBounds();
 //        rollbackBounds();
 
 
@@ -286,4 +294,11 @@ void Burgers::sendAndReceiveRows() {
 
 int Burgers::getRank(int rankx, int ranky) {
     return rankx*Py+ranky;
+}
+
+void Burgers::exchangeBounds() {
+    MPI_Allreduce(&lbound, &lbound, 1, MPI_DOUBLE, MPI_MIN , MPI_COMM_WORLD);
+    MPI_Allreduce(&tbound, &tbound, 1, MPI_DOUBLE, MPI_MIN , MPI_COMM_WORLD);
+    MPI_Allreduce(&rbound, &rbound, 1, MPI_DOUBLE, MPI_MAX , MPI_COMM_WORLD);
+    MPI_Allreduce(&bbound, &bbound, 1, MPI_DOUBLE, MPI_MAX , MPI_COMM_WORLD);
 }
