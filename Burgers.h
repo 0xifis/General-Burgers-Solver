@@ -19,6 +19,7 @@ class Burgers {
         void splitDomain();
         void exchangePadding();
         void sendAndReceiveCols();
+        void sendAndReceiveRows();
         int getRank(int rankx, int ranky);
         Model* m;
         double* u;

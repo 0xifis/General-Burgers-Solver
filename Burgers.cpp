@@ -186,6 +186,7 @@ void Burgers::calculateFieldEnergy() {
 
 void Burgers::exchangePadding() {
     if (Px > 1) sendAndReceiveCols();
+    if (Py > 1) sendAndReceiveRows();
 }
 
 void Burgers::sendAndReceiveCols() {
@@ -229,6 +230,52 @@ void Burgers::sendAndReceiveCols() {
         MPI_Isend(&v[left_inner_col], 1, inner_col, getRank(rankx-1,ranky), 1, MPI_COMM_WORLD, &reqs[1]);
         MPI_Irecv(&u[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 0, MPI_COMM_WORLD, &reqs[2]);
         MPI_Irecv(&v[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 1, MPI_COMM_WORLD, &reqs[3]);
+        MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
+        delete[] reqs;
+    }
+}
+
+void Burgers::sendAndReceiveRows() {
+//    MPI_Send( void* data, int count, MPI_Datatype datatype, int destination, int tag, MPI_Comm communicator)
+    MPI_Datatype inner_row;
+    MPI_Type_vector(1,locNx-2,Ny,MPI_DOUBLE,&inner_row);
+    MPI_Type_commit(&inner_row);
+    
+    int bot_inner_row = worldRef+Ny+locNy-2;
+    int bot_padding_row= worldRef+Ny+locNy-1;
+    
+    int top_inner_row = worldRef+Ny+1;
+    int top_padding_row = worldRef+Ny;
+    
+    if(ranky>0 && ranky < Py-1) { // Center domains; send left & right
+        auto* reqs = new MPI_Request[8];
+        MPI_Isend(&u[bot_inner_row], 1, inner_row, getRank(rankx,ranky+1), 0, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(&v[bot_inner_row], 1, inner_row, getRank(rankx,ranky+1), 1, MPI_COMM_WORLD, &reqs[1]);
+        MPI_Irecv(&u[bot_padding_row], 1, inner_row, getRank(rankx,ranky+1), 0, MPI_COMM_WORLD, &reqs[2]);
+        MPI_Irecv(&v[bot_padding_row], 1, inner_row, getRank(rankx,ranky+1), 1, MPI_COMM_WORLD, &reqs[3]);
+        
+        MPI_Isend(&u[top_inner_row], 1, inner_row, getRank(rankx,ranky-1), 0, MPI_COMM_WORLD, &reqs[4]);
+        MPI_Isend(&v[top_inner_row], 1, inner_row, getRank(rankx,ranky-1), 1, MPI_COMM_WORLD, &reqs[5]);
+        MPI_Irecv(&u[top_padding_row], 1, inner_row, getRank(rankx,ranky-1), 0, MPI_COMM_WORLD, &reqs[6]);
+        MPI_Irecv(&v[top_padding_row], 1, inner_row, getRank(rankx,ranky-1), 1, MPI_COMM_WORLD, &reqs[7]);
+        MPI_Waitall(8, reqs, MPI_STATUSES_IGNORE);
+        delete[] reqs;
+    } else if (ranky==0) { //Left domain; send & recv right col,
+//        cout << "P" << world_rank << ": sending right col to " << worldRef+(locNx-2)*Ny+1 << endl;
+//        cout << "P" << world_rank << ": sending left col to " << worldRef+Ny+1 << endl;
+        auto* reqs = new MPI_Request[4];
+        MPI_Isend(&u[bot_inner_row], 1, inner_row, getRank(rankx,ranky+1), 0, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(&v[bot_inner_row], 1, inner_row, getRank(rankx,ranky+1), 1, MPI_COMM_WORLD, &reqs[1]);
+        MPI_Irecv(&u[bot_padding_row], 1, inner_row, getRank(rankx,ranky+1), 0, MPI_COMM_WORLD, &reqs[2]);
+        MPI_Irecv(&v[bot_padding_row], 1, inner_row, getRank(rankx,ranky+1), 1, MPI_COMM_WORLD, &reqs[3]);
+        MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
+        delete[] reqs;
+    } else { //Right domain; send & recv left col,
+        auto* reqs = new MPI_Request[4];
+        MPI_Isend(&u[top_inner_row], 1, inner_row, getRank(rankx,ranky-1), 0, MPI_COMM_WORLD, &reqs[0]);
+        MPI_Isend(&v[top_inner_row], 1, inner_row, getRank(rankx,ranky-1), 1, MPI_COMM_WORLD, &reqs[1]);
+        MPI_Irecv(&u[top_padding_row], 1, inner_row, getRank(rankx,ranky-1), 0, MPI_COMM_WORLD, &reqs[2]);
+        MPI_Irecv(&v[top_padding_row], 1, inner_row, getRank(rankx,ranky-1), 1, MPI_COMM_WORLD, &reqs[3]);
         MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
         delete[] reqs;
     }
