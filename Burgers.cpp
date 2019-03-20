@@ -53,34 +53,47 @@ void Burgers::integrateVelocityField() {
     double tempu, tempv;
     
 	typedef std::chrono::high_resolution_clock hrc;
+    
+    const int block_size = 64 / sizeof(double); // 64 = common cache line size
+
     hrc::time_point loop_start = hrc::now();
     
     auto* un = new double[Nx*Ny];
     auto* vn = new double[Nx*Ny];
+    unsigned int colmax, rowmax;
     for (int t = 1; t <= Nt; ++t) {
         llbound = max(lbound, worldx+1);
         lrbound = min(rbound, worldx+locNx-2);
         ltbound = max(tbound, worldy+1);
         lbbound = min(bbound, worldy+locNy-2);
-        #pragma omp parallel for private(i_j, ix_j, xi_j, i_jx, i_xj, tempu, tempv) ordered
-        for(unsigned int col = llbound; col <= lrbound; ++col) {
-            #pragma omp simd
-            for(unsigned int row = ltbound; row <= lbbound; ++row) {
-                i_j = col*Ny+row;
-                i_jx= i_j + 1;
-                i_xj= i_j - 1;
-                ix_j= i_j + Ny;
-                xi_j= i_j - Ny;
-                
-                tempu = p_xi_j * u[xi_j] + p_ix_j * u[ix_j] + p_i_j * u[i_j] + p_i_xj * u[i_xj] + p_i_jx * u[i_jx];
-                tempu+= -1.0 * b / dx   * u[i_j] * (u[i_j] - u[xi_j]) - b / dy * v[i_j] * (u[i_j] - u[i_xj]);
-    
-                tempv = p_xi_j * v[xi_j] + p_ix_j * v[ix_j] + p_i_j * v[i_j] + p_i_xj * v[i_xj] + p_i_jx * v[i_jx];
-                tempv+= (-1.0 * b / dx) * u[i_j] * (v[i_j] - v[xi_j]) - (b / dy ) * v[i_j] * (v[i_j] - v[i_xj]);
-    
-                un[i_j] = dt * tempu;
-                vn[i_j] = dt * tempv;
-                if (fabs(un[i_j]) > 1e-8 || fabs(vn[i_j]) > 1e-8) adjustBounds(row, col);
+        #pragma omp parallel for private(i_j, ix_j, xi_j, i_jx, i_xj, tempu, tempv, colmax, rowmax) ordered
+//        for(unsigned int col = llbound; col <= lrbound; ++col) {
+//            for(unsigned int row = ltbound; row <= lbbound; ++row) {
+        for (unsigned int colb = llbound; colb < lrbound+1; colb += block_size) {
+            colmax = min(lrbound,colb+block_size);
+            for (unsigned int rowb = ltbound; rowb < lbbound+1; rowb += block_size) {
+                rowmax = min(lbbound,rowb+block_size);
+                for (unsigned int col = colb; col < colmax; ++col) {
+                    for (unsigned int row = rowb; row < rowmax; ++row) {
+                        i_j = col * Ny + row;
+                        i_jx = i_j + 1;
+                        i_xj = i_j - 1;
+                        ix_j = i_j + Ny;
+                        xi_j = i_j - Ny;
+        
+                        tempu = p_xi_j * u[xi_j] + p_ix_j * u[ix_j] + p_i_j * u[i_j] + p_i_xj * u[i_xj] +
+                                p_i_jx * u[i_jx];
+                        tempu += -1.0 * b / dx * u[i_j] * (u[i_j] - u[xi_j]) - b / dy * v[i_j] * (u[i_j] - u[i_xj]);
+        
+                        tempv = p_xi_j * v[xi_j] + p_ix_j * v[ix_j] + p_i_j * v[i_j] + p_i_xj * v[i_xj] +
+                                p_i_jx * v[i_jx];
+                        tempv += (-1.0 * b / dx) * u[i_j] * (v[i_j] - v[xi_j]) - (b / dy) * v[i_j] * (v[i_j] - v[i_xj]);
+        
+                        un[i_j] = dt * tempu;
+                        vn[i_j] = dt * tempv;
+                        if (fabs(un[i_j]) > 1e-8 || fabs(vn[i_j]) > 1e-8) adjustBounds(row, col);
+                    }
+                }
             }
         }
         swap(un, u);
