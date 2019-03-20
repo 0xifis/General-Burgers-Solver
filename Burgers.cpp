@@ -273,8 +273,8 @@ void Burgers::exchangeBounds() {
 }
 
 void Burgers::printVelocityField() {
-    serializeMatrix(u, "velocity_u.csv");
-    serializeMatrix(v, "velocity_v.csv");
+    serializeMatrix(u, "velocity_u_" + to_string(rankx) + "_" + to_string(ranky) + ".csv");
+    serializeMatrix(v, "velocity_v_" + to_string(rankx) + "_" + to_string(ranky) + ".csv");
 }
 
 void Burgers::serializeMatrix(double *m, string filename) {
