@@ -69,10 +69,10 @@ void Burgers::integrateVelocityField() {
         #pragma omp parallel for private(i_j, ix_j, xi_j, i_jx, i_xj, tempu, tempv, colmax, rowmax) ordered
 //        for(unsigned int col = llbound; col <= lrbound; ++col) {
 //            for(unsigned int row = ltbound; row <= lbbound; ++row) {
-        for (unsigned int colb = llbound; colb < lrbound+1; colb += block_size) {
-            colmax = min(lrbound,colb+block_size);
-            for (unsigned int rowb = ltbound; rowb < lbbound+1; rowb += block_size) {
-                rowmax = min(lbbound,rowb+block_size);
+        for (unsigned int colb = llbound; colb <= lrbound; colb += block_size) {
+            colmax = min(lrbound+1,colb+block_size);
+            for (unsigned int rowb = ltbound; rowb <= lbbound; rowb += block_size) {
+                rowmax = min(lbbound+1,rowb+block_size);
                 for (unsigned int col = colb; col < colmax; ++col) {
                     for (unsigned int row = rowb; row < rowmax; ++row) {
                         i_j = col * Ny + row;
