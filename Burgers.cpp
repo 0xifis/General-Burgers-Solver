@@ -42,8 +42,6 @@ void Burgers::initializeVelocityField() {
             v[col*Ny+row] = rb;
         }
     }
-    cout << "\tl: " << lbound << " r: " << rbound << " t: " << tbound << " b: " << bbound
-               << endl;
 }
 
 void Burgers::printVelocityField() {
@@ -117,17 +115,14 @@ void Burgers::integrateVelocityField() {
         swap(un, u);
         swap(vn, v);
         exchangePadding();
-//        rollbackBounds();
         exchangeBounds();
-
-
-
-		if (verbose && t%500 == 0)
-			cout << "Time Step: " << t << " of " << Nt
-				 << "\tRunning time: " << chrono::duration_cast<chrono::milliseconds>(hrc::now() - loop_start).count()
-				 << "ms"
-				 << "\tl: " << lbound << " r: " << rbound << " t: " << tbound << " b: " << bbound
-				 << endl;
+    
+        if (verbose && t%500 == 0)
+            cout << "Time Step: " << t << " of " << Nt
+                 << "\tRunning time: " << chrono::duration_cast<chrono::milliseconds>(hrc::now() - loop_start).count()
+                 << "ms"
+                 << "\tl: " << lbound << " r: " << rbound << " t: " << tbound << " b: " << bbound
+                 << endl;
     }
     delete[] vn;
     delete[] un;
@@ -142,13 +137,6 @@ void Burgers::adjustBounds(unsigned int row, unsigned int col) {
         if (tbound >= row) tbound = row - 1;
         if (bbound <= row) bbound = row + 1;
     }
-}
-
-void Burgers::rollbackBounds() {
-    if(lbound > 1) lbound--;
-    if(rbound < Nx-2) rbound++;
-    if(tbound > 1) tbound--;
-    if(bbound < Ny-2) bbound++;
 }
 
 void Burgers::splitDomain() {
@@ -167,14 +155,13 @@ void Burgers::splitDomain() {
     locNy = dvy.quot + ( ranky < dvy.rem? 1 : 0) + 2;
     
     worldRef = worldx*Ny + worldy;
-    if(m->isVerbose()) cout << "P" << world_rank
-                            << " worldref: " << worldRef
-                            << " worldx: " << worldx
-                            << " worldy: " << worldy
-                            << " rankx: " << rankx
-                            << " ranky: " << ranky
-                            << " locNx: " << locNx
-                            << " locNy: " << locNy << endl;
+    if(m->isVerbose()) cout << "Processor #" << world_rank
+                            << ":\trankx: " << rankx
+                            << "\tranky: " << ranky
+                            << "\tlocNx: " << locNx
+                            << "\tlocNy: " << locNy
+                            << "\tworldx: " << worldx
+                            << "\tworldy: " << worldy << endl;
 }
 
 double Burgers::getFieldEnergy() {
