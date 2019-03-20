@@ -1,11 +1,8 @@
 #include "Burgers.h"
-#include <iostream>
 #include <fstream>
 #include <cmath>
 #include <chrono>
 #include "mpi.h"
-#include <stdio.h>
-#include <algorithm>
 
 using namespace std;
 

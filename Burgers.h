@@ -33,7 +33,6 @@ class Burgers {
         unsigned int rbound = 0;
         unsigned int tbound = Nx;
         unsigned int bbound = 0;
-        void rollbackBounds();
         bool verbose = m->isVerbose();
     
         double worldEnergy = 0.0;
