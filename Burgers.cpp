@@ -162,7 +162,6 @@ void Burgers::calculateFieldEnergy() {
 }
 
 void Burgers::sendAndReceiveCols() {
-//    MPI_Send( void* data, int count, MPI_Datatype datatype, int destination, int tag, MPI_Comm communicator)
     MPI_Datatype inner_col;
     MPI_Type_vector(1,locNy-2,locNy-2,MPI_DOUBLE,&inner_col);
     MPI_Type_commit(&inner_col);
@@ -186,9 +185,7 @@ void Burgers::sendAndReceiveCols() {
         MPI_Irecv(&v[left_padding_col], 1, inner_col, getRank(rankx-1,ranky), 1, MPI_COMM_WORLD, &reqs[7]);
         MPI_Waitall(8, reqs, MPI_STATUSES_IGNORE);
         delete[] reqs;
-    } else if (rankx == 0) { //Left domain; send & recv right col,
-//        cout << "P" << world_rank << ": sending right col to " << worldRef+(locNx-2)*Ny+1 << endl;
-//        cout << "P" << world_rank << ": sending left col to " << worldRef+Ny+1 << endl;
+    } else if (rankx == 0) {
         auto* reqs = new MPI_Request[4];
         MPI_Isend(&u[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 0, MPI_COMM_WORLD, &reqs[0]);
         MPI_Isend(&v[right_inner_col], 1, inner_col, getRank(rankx+1,ranky), 1, MPI_COMM_WORLD, &reqs[1]);
@@ -205,11 +202,9 @@ void Burgers::sendAndReceiveCols() {
         MPI_Waitall(4, reqs, MPI_STATUSES_IGNORE);
         delete[] reqs;
     }
-//    TODO: pull up the waitall
 }
 
 void Burgers::sendAndReceiveRows() {
-//    MPI_Send( void* data, int count, MPI_Datatype datatype, int destination, int tag, MPI_Comm communicator)
     MPI_Datatype inner_row;
     MPI_Type_vector(locNx-2,1,Ny,MPI_DOUBLE,&inner_row);
     MPI_Type_commit(&inner_row);
@@ -234,8 +229,6 @@ void Burgers::sendAndReceiveRows() {
         MPI_Waitall(8, reqs, MPI_STATUSES_IGNORE);
         delete[] reqs;
     } else if (ranky==0) { //Left domain; send & recv right col,
-//        cout << "P" << world_rank << ": sending bot row to " << bot_inner_row << endl;
-//        cout << "P" << world_rank << ": waiting for " << bot_padding_row << endl;
         auto* reqs = new MPI_Request[4];
         MPI_Isend(&u[bot_inner_row], 1, inner_row, getRank(rankx,ranky+1), 0, MPI_COMM_WORLD, &reqs[0]);
         MPI_Isend(&v[bot_inner_row], 1, inner_row, getRank(rankx,ranky+1), 1, MPI_COMM_WORLD, &reqs[1]);
@@ -245,8 +238,6 @@ void Burgers::sendAndReceiveRows() {
         delete[] reqs;
     } else { //Right domain; send & recv left col,
         auto* reqs = new MPI_Request[4];
-//        cout << "P" << world_rank << ": sending top row to " << top_inner_row << endl;
-//        cout << "P" << world_rank << ": waiting for " << top_padding_row << endl;
         MPI_Isend(&u[top_inner_row], 1, inner_row, getRank(rankx,ranky-1), 0, MPI_COMM_WORLD, &reqs[0]);
         MPI_Isend(&v[top_inner_row], 1, inner_row, getRank(rankx,ranky-1), 1, MPI_COMM_WORLD, &reqs[1]);
         MPI_Irecv(&u[top_padding_row], 1, inner_row, getRank(rankx,ranky-1), 0, MPI_COMM_WORLD, &reqs[2]);

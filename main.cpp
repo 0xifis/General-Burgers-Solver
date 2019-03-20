@@ -3,7 +3,6 @@
 #include "Burgers.h"
 #include "mpi.h"
 #include "MyMPI.h"
-#include "helper.h"
 
 using namespace std;
 
@@ -14,14 +13,11 @@ int main(int argc, char* argv[]) {
     if (m.isVerbose() && myMPI.rank()==0) m.printParameters();
     
     if(!myMPI.isValid()) return 1;
-//    MPI_Comm myComm;
-//    myMPI.createSubComm(&myComm);
     
     if (m.isValid()) {
         MPI_Barrier(MPI_COMM_WORLD);
         Burgers b(&m, &myMPI);
 
-        // Call code to initialise the problem here
         b.initializeVelocityField();
 
         typedef std::chrono::high_resolution_clock hrc;
@@ -39,9 +35,7 @@ int main(int argc, char* argv[]) {
              << ": Integration took "
              << chrono::duration_cast<ms>(end - start).count()/1000.
              << "s.\n";
-        
 
-        // Calculate final energy and write output
         b.calculateFieldEnergy();
         if(myMPI.rank()==0) {
             cout << "Energy: " << b.getFieldEnergy() << endl;

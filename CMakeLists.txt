@@ -19,18 +19,31 @@ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(burgers main.cpp Model.cpp Burgers.cpp MyMPI.cpp MyMPI.h helper.h)
-# TODO: Remove helper.h
+add_executable(burgers main.cpp Model.cpp Burgers.cpp MyMPI.cpp MyMPI.h)
 
 add_custom_target(burg
-        COMMAND burgers -p 1 0.5 1 0.02 -s 2001 2001 4000
+        COMMAND burgers OMP_NUM_THREADS=10 mpirun -np 1 burgers  --physics 1 0.5 1 0.02 --steps 2001 2001 4000 -x 1 1
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Running burgers in ${CMAKE_CURRENT_SOURCE_DIR}"
         SOURCES ${burgers_SOURCES}
         )
 
 add_custom_target(advx
-        COMMAND burgers --physics 1 0 0 0 --steps 2001 2001 4000 -v
+        COMMAND OMP_NUM_THREADS=10 mpirun -np 1 burgers  --physics 1 0 0 0 --steps 2001 2001 4000 -x 1 1
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
+        SOURCES ${burgers_SOURCES}
+        )
+
+add_custom_target(advy
+        COMMAND OMP_NUM_THREADS=10 mpirun -np 1 burgers  --physics 0 1 0 0 --steps 2001 2001 4000 -x 1 1
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
+        SOURCES ${burgers_SOURCES}
+        )
+
+add_custom_target(diff
+        COMMAND OMP_NUM_THREADS=10 mpirun -np 1 burgers  --physics 0 0 0 1 --steps 201 201 4000 -x 1 1
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
         SOURCES ${burgers_SOURCES}
@@ -38,30 +51,42 @@ add_custom_target(advx
 
 
 add_custom_target(burgp
-        COMMAND mpirun burgers -np 2 --physics 1 0.5 1 0.02 --steps 2001 2001 4000 -x 2 1 -v
+        COMMAND OMP_NUM_THREADS=8 mpirun -np 2 burgers  --physics 1 0.5 1 0.02 --steps 2001 2001 4000 -x 2 1
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
         SOURCES ${burgers_SOURCES}
         )
 
 add_custom_target(advxp
-        COMMAND mpirun burgers -np 2 --physics 1 0 0 0 --steps 2001 2001 4000 -x 2 1 -v
+        COMMAND OMP_NUM_THREADS=8 mpirun -np 2 burgers  --physics 1 0 0 0 --steps 2001 2001 4000 -x 2 1
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
         SOURCES ${burgers_SOURCES}
         )
 
-add_custom_target(q
-        COMMAND mpirun burgers -np 2 --physics 1 0.5 1 0.02 --steps 11 11 400 -x 2 1 -v
+add_custom_target(advyp
+        COMMAND OMP_NUM_THREADS=8 mpirun -np 2 burgers  --physics 0 1 0 0 --steps 2001 2001 4000 -x 2 1
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
         SOURCES ${burgers_SOURCES}
         )
+
+add_custom_target(diffp
+        COMMAND OMP_NUM_THREADS=8 mpirun -np 2 burgers  --physics 0 0 0 1 --steps 201 201 4000 -x 2 1
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Running burgers in ${CMAKE_BINARY_DIR}"
+        SOURCES ${burgers_SOURCES}
+        )
+
 
 add_dependencies(burgp burgers)
 add_dependencies(advxp burgers)
+add_dependencies(advyp burgers)
+add_dependencies(diffp burgers)
+
 add_dependencies(burg burgers)
+add_dependencies(advy burgers)
 add_dependencies(advx burgers)
-add_dependencies(q burgers)
+add_dependencies(diff burgers)
 
 
