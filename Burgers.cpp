@@ -15,18 +15,6 @@ Burgers::Burgers(Model *m_, MyMPI *myMPI_) : m(m_), myMPI(myMPI_) {
     splitDomain();
 }
 
-double Burgers::x(int col) {
-    const double dx = m -> getDx();
-    const double Lx = m -> getLx();
-    return (dx * col - Lx / 2);
-}
-
-double Burgers::y(int row) {
-    const double dy = m -> getDy();
-    const double Ly = m -> getLy();
-    return (dy * row - Ly / 2);
-}
-
 void Burgers::initializeVelocityField() {
     double r, rb;
     for(unsigned int col=worldx; col < worldx+locNx; ++col ) {
@@ -42,23 +30,6 @@ void Burgers::initializeVelocityField() {
             v[col*Ny+row] = rb;
         }
     }
-}
-
-void Burgers::printVelocityField() {
-    serializeMatrix(u, "velocity_u.csv");
-    serializeMatrix(v, "velocity_v.csv");
-}
-
-void Burgers::serializeMatrix(double *m, string filename) {
-    ofstream dataFile (filename, fstream::trunc);
-    cout << "Writing velocity field data to file - " << filename << endl;
-    for(unsigned int row=0; row<Ny; ++row) {
-        for(unsigned int col=0; col<Nx; ++col) {
-            dataFile << (col==0 ? ' ' : ',') << m[col*Ny+row];
-        }
-        dataFile << '\n';
-    }
-    dataFile.close();
 }
 
 void Burgers::integrateVelocityField() {
@@ -128,6 +99,18 @@ void Burgers::integrateVelocityField() {
     delete[] un;
 }
 
+double Burgers::x(int col) {
+    const double dx = m -> getDx();
+    const double Lx = m -> getLx();
+    return (dx * col - Lx / 2);
+}
+
+double Burgers::y(int row) {
+    const double dy = m -> getDy();
+    const double Ly = m -> getLy();
+    return (dy * row - Ly / 2);
+}
+
 void Burgers::adjustBounds(unsigned int row, unsigned int col) {
     if(col <  Nx-2 && col > 1) {
         if (lbound >= col) lbound = col - 1;
@@ -179,11 +162,6 @@ void Burgers::calculateFieldEnergy() {
     }
     MPI_Reduce(&energy, &worldEnergy, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     worldEnergy *= dx*dy*0.5;
-}
-
-void Burgers::exchangePadding() {
-    if (Px > 1) sendAndReceiveCols();
-    if (Py > 1) sendAndReceiveRows();
 }
 
 void Burgers::sendAndReceiveCols() {
@@ -285,9 +263,31 @@ int Burgers::getRank(int rankx, int ranky) {
     return rankx*Py+ranky;
 }
 
+void Burgers::exchangePadding() {
+    if (Px > 1) sendAndReceiveCols();
+    if (Py > 1) sendAndReceiveRows();
+}
+
 void Burgers::exchangeBounds() {
     MPI_Allreduce(MPI_IN_PLACE, &lbound, 1, MPI_UNSIGNED, MPI_MIN , MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &tbound, 1, MPI_UNSIGNED, MPI_MIN , MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &rbound, 1, MPI_UNSIGNED, MPI_MAX , MPI_COMM_WORLD);
     MPI_Allreduce(MPI_IN_PLACE, &bbound, 1, MPI_UNSIGNED, MPI_MAX , MPI_COMM_WORLD);
+}
+
+void Burgers::printVelocityField() {
+    serializeMatrix(u, "velocity_u.csv");
+    serializeMatrix(v, "velocity_v.csv");
+}
+
+void Burgers::serializeMatrix(double *m, string filename) {
+    ofstream dataFile (filename, fstream::trunc);
+    cout << "Writing velocity field data to file - " << filename << endl;
+    for(unsigned int row=0; row<Ny; ++row) {
+        for(unsigned int col=0; col<Nx; ++col) {
+            dataFile << (col==0 ? ' ' : ',') << m[col*Ny+row];
+        }
+        dataFile << '\n';
+    }
+    dataFile.close();
 }

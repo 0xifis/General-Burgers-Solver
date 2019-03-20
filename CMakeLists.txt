@@ -20,6 +20,7 @@ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(burgers main.cpp Model.cpp Burgers.cpp MyMPI.cpp MyMPI.h helper.h)
+# TODO: Remove helper.h
 
 add_custom_target(burg
         COMMAND burgers -p 1 0.5 1 0.02 -s 2001 2001 4000
